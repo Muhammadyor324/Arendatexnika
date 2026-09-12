@@ -121,10 +121,19 @@ function App() {
   const [search, setSearch] = useState('');
   const [searchDraft, setSearchDraft] = useState('');
   const [category, setCategory] = useState('Barchasi');
-  const [location, setLocation] = useState(() => storage.read('arenda-location-v1', ''));
+  const [location, setLocation] = useState(() => {
+    const value = storage.read('arenda-location-v1', '');
+    return typeof value === 'string' ? value : '';
+  });
   const [maxPrice, setMaxPrice] = useState(1000000);
-  const [favorites, setFavorites] = useState(() => new Set(storage.read('arenda-favorites-v1', [2])));
-  const [bookings, setBookings] = useState(() => storage.read('arenda-bookings-v1', initialBookings));
+  const [favorites, setFavorites] = useState(() => {
+    const value = storage.read('arenda-favorites-v1', [2]);
+    return new Set(Array.isArray(value) ? value.filter((item) => Number.isInteger(item)) : [2]);
+  });
+  const [bookings, setBookings] = useState(() => {
+    const value = storage.read('arenda-bookings-v1', initialBookings);
+    return Array.isArray(value) && value.every((item) => item && item.id && item.equipment) ? value : initialBookings;
+  });
   const [toast, setToast] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [listingOpen, setListingOpen] = useState(false);
@@ -138,7 +147,10 @@ function App() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [lang, setLang] = useState(() => storage.read('arenda-language-v1', 'UZ'));
+  const [lang, setLang] = useState(() => {
+    const value = storage.read('arenda-language-v1', 'UZ');
+    return ['UZ', 'RU', 'EN'].includes(value) ? value : 'UZ';
+  });
 
   const selectedEquipment = equipment.find((item) => item.id === selectedId) || equipment[0];
   const copy = translations[lang];
