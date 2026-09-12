@@ -13,6 +13,7 @@ Production build:
 
 ```bash
 npm run build
+npm audit --omit=dev
 ```
 
 ## Dizayn va lokal assetlar
@@ -37,5 +38,16 @@ Interfeys iOS 17 ruhida qayta ishlangan: oq va och kulrang qatlamlar, `backdrop-
 - O‘zbek, rus va ingliz tillari uchun ishlaydigan til almashtirish tugmasi; asosiy navigatsiya va bosh sahifa matnlari tarjima qilinadi.
 - Responsive va animatsiyali UI: sahifa kirish animatsiyasi, hover states, yumshoq micro-interactions va mobil panel.
 - Admin panel: foydalanuvchilar, e’lonlar, buyurtmalar, moderatsiya, daromad grafigi va kategoriyalar statistikasi.
+
+## Kod sifati va xavfsizlik
+
+- React escaped rendering ishlatiladi; user kiritgan matn HTML sifatida inject qilinmaydi.
+- Auth formasi bo‘sh ma’lumot va qisqa parollarni qabul qilmaydi.
+- Media yuklash faqat rasm/video MIME turini va 10 MB limitni tekshiradi.
+- Parol localStorage’ga yozilmaydi; faqat UI state’da ishlatiladi.
+- Sevimlilar, hudud, til va buyurtmalar faqat demo ma’lumot sifatida namespaced localStorage’da saqlanadi.
+- Vite server va preview uchun `nosniff`, `Referrer-Policy`, `Permissions-Policy` va COOP security headerlari qo‘shilgan.
+- Error boundary, keyboard focus state, skip-link va reduced-motion qo‘llab-quvvatlashi bor.
+- `npm audit --omit=dev` tekshiruvi: 0 vulnerability.
 
 Hozirgi versiya frontend MVP sifatida local state bilan ishlaydi. Real Payme/Click, SMS OTP, xarita API, fayl storage va backend ulanishi uchun server/API kalitlari qo‘shilishi kerak.

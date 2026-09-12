@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import './styles.css';
 import './ios17-overrides.css';
+import './security-a11y.css';
 
 const toolImage = (name) => `/assets/${name}`;
 const equipmentSeed = [
@@ -66,6 +67,24 @@ const initialBookings = [
   { id: 'AT-1994', equipment: equipmentSeed[2], start: '2026-08-05', end: '2026-08-07', days: 3, total: 270000, status: 'Yakunlandi', payment: 'Naqd' }
 ];
 
+const storage = {
+  read(key, fallback) {
+    try {
+      const value = window.localStorage.getItem(key);
+      return value ? JSON.parse(value) : fallback;
+    } catch {
+      return fallback;
+    }
+  },
+  write(key, value) {
+    try { window.localStorage.setItem(key, JSON.stringify(value)); } catch { /* storage may be disabled */ }
+  }
+};
+const dateISO = (offset = 0) => {
+  const date = new Date();
+  date.setDate(date.getDate() + offset);
+  return date.toISOString().slice(0, 10);
+};
 const formatPrice = (price) => `${new Intl.NumberFormat('uz-UZ').format(price)} so'm`;
 const shortPrice = (price) => price >= 1000000 ? `${(price / 1000000).toFixed(1).replace('.0', '')} mln` : `${Math.round(price / 1000)} ming`;
 const calculateDays = (start, end) => {
@@ -102,10 +121,10 @@ function App() {
   const [search, setSearch] = useState('');
   const [searchDraft, setSearchDraft] = useState('');
   const [category, setCategory] = useState('Barchasi');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState(() => storage.read('arenda-location-v1', ''));
   const [maxPrice, setMaxPrice] = useState(1000000);
-  const [favorites, setFavorites] = useState(new Set([2]));
-  const [bookings, setBookings] = useState(initialBookings);
+  const [favorites, setFavorites] = useState(() => new Set(storage.read('arenda-favorites-v1', [2])));
+  const [bookings, setBookings] = useState(() => storage.read('arenda-bookings-v1', initialBookings));
   const [toast, setToast] = useState(null);
   const [bookingOpen, setBookingOpen] = useState(false);
   const [listingOpen, setListingOpen] = useState(false);
@@ -119,7 +138,7 @@ function App() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [favoritesOnly, setFavoritesOnly] = useState(false);
-  const [lang, setLang] = useState('UZ');
+  const [lang, setLang] = useState(() => storage.read('arenda-language-v1', 'UZ'));
 
   const selectedEquipment = equipment.find((item) => item.id === selectedId) || equipment[0];
   const copy = translations[lang];
@@ -138,6 +157,10 @@ function App() {
     const timeout = setTimeout(() => setToast(null), 3500);
     return () => clearTimeout(timeout);
   }, [toast]);
+  useEffect(() => storage.write('arenda-location-v1', location), [location]);
+  useEffect(() => storage.write('arenda-favorites-v1', [...favorites]), [favorites]);
+  useEffect(() => storage.write('arenda-bookings-v1', bookings), [bookings]);
+  useEffect(() => storage.write('arenda-language-v1', lang), [lang]);
 
   const notify = (message, type = 'success') => setToast({ message, type });
   const goTo = (nextPage) => {
@@ -193,6 +216,10 @@ function App() {
     goTo('dashboard');
   };
   const createBooking = (details) => {
+    if (!details.start || !details.end || new Date(details.end) < new Date(details.start)) {
+      notify('Tugash sanasi boshlanish sanasidan keyin bo‘lishi kerak.', 'error');
+      return;
+    }
     if (!isAuthenticated) {
       setPendingBooking(details);
       setAuthOpen(true);
@@ -243,6 +270,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <a className="skip-link" href="#main-content">Asosiy kontentga o‘tish</a>
       <header className="site-header">
         <div className="header-inner">
           <button className="brand" onClick={() => goTo('home')} aria-label="ArendaTexnika bosh sahifa">
@@ -258,7 +286,7 @@ function App() {
           <div className="header-actions">
             <button className="language-button" onClick={() => { setLang(lang === 'UZ' ? 'RU' : lang === 'RU' ? 'EN' : 'UZ'); notify(`Til: ${lang === 'UZ' ? 'Русский' : lang === 'RU' ? 'English' : 'O‘zbekcha'}`); }}><Globe2 size={16} /> {lang}<ChevronDown size={13} /></button>
             <button className="region-chip" onClick={() => setRegionOpen(true)}><MapPin size={15} /><span>{location || copy.allRegions}</span><ChevronDown size={13} /></button>
-            <button className="icon-button desktop-only" onClick={openFavorites} aria-label="Sevimlilar"><Heart size={19} /></button>
+            <button className="icon-button desktop-only" onClick={openFavorites} aria-label={`Sevimlilar: ${favorites.size} ta`}><Heart size={19} /><span className="icon-counter">{favorites.size}</span></button>
             <div className="popover-anchor">
               <button className="icon-button" onClick={() => { setNotificationsOpen(!notificationsOpen); setUserMenuOpen(false); }} aria-label="Bildirishnomalar"><Bell size={19} /><span className="notification-dot" /></button>
               {notificationsOpen && <NotificationPopover />}
@@ -273,7 +301,7 @@ function App() {
         </div>
       </header>
 
-      <main>
+      <main id="main-content">
         {page === 'home' && <Home copy={copy} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} chooseCategory={chooseCategory} openDetail={openDetail} toggleFavorite={toggleFavorite} favorites={favorites} setListingOpen={openListing} goTo={goTo} location={location} openRegionPicker={() => setRegionOpen(true)} />}
         {page === 'catalog' && <Catalog copy={copy} items={filteredEquipment} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} category={category} setCategory={(value) => { setCategory(value); setFavoritesOnly(false); }} location={location} setLocation={setLocation} openRegionPicker={() => setRegionOpen(true)} maxPrice={maxPrice} setMaxPrice={setMaxPrice} favorites={favorites} toggleFavorite={toggleFavorite} openDetail={openDetail} favoritesOnly={favoritesOnly} setFavoritesOnly={setFavoritesOnly} />}
         {page === 'detail' && <Detail item={selectedEquipment} isFavorite={favorites.has(selectedEquipment.id)} toggleFavorite={toggleFavorite} goTo={goTo} setBookingOpen={setBookingOpen} createBooking={createBooking} notify={notify} contactOwner={contactOwner} />}
@@ -394,8 +422,8 @@ function EmptyResults({ clear }) { return <div className="empty-results"><span><
 
 function Detail({ item, isFavorite, toggleFavorite, goTo, setBookingOpen, createBooking, notify, contactOwner }) {
   const [activeImage, setActiveImage] = useState(0);
-  const [start, setStart] = useState('2026-09-16');
-  const [end, setEnd] = useState('2026-09-18');
+  const [start, setStart] = useState(() => dateISO(2));
+  const [end, setEnd] = useState(() => dateISO(4));
   const days = calculateDays(start, end);
   const total = days * item.price;
   return <section className="detail-page page-width"><div className="breadcrumbs"><button onClick={() => goTo('catalog')}>Katalog</button><ChevronRight size={14} /><span>{item.category}</span><ChevronRight size={14} /><span>{item.name}</span></div>
@@ -406,7 +434,7 @@ function Detail({ item, isFavorite, toggleFavorite, goTo, setBookingOpen, create
       <div className="spec-grid"><Spec icon="calendar" label="Ishlab chiqarilgan" value={`${item.year}-yil`} /><Spec icon="power" label="Quvvati" value={item.power} /><Spec icon="capacity" label="Hajmi" value={item.capacity} /><Spec icon="truck" label="Yetkazib berish" value="Kelishiladi" /></div>
       <div className="detail-divider" /><section className="owner-section"><div className="subsection-heading"><div><span className="eyebrow">Asbob egasi</span><h2>Egasi haqida</h2></div><button className="text-button" onClick={contactOwner}>Arendator bilan yozishish <MessageCircle size={15} /></button></div><div className="owner-card"><span className="avatar avatar-large">{item.ownerAvatar}</span><span className="owner-info"><strong>{item.owner}</strong><small><ShieldCheck size={13} /> Tasdiqlangan egasi · 2021-yildan beri</small></span><span className="owner-stats"><b><Star size={14} fill="currentColor" /> 4.9</b><small>18 ta sharh</small></span><ArrowRight size={17} /></div></section>
       <section className="location-section"><div className="subsection-heading"><div><span className="eyebrow">Joylashuv</span><h2>Asbob qayerda?</h2></div><button className="text-button" onClick={() => notify('Xarita yangi oynada ochiladi.')}>Xaritada ko‘rish <ArrowUpRight size={15} /></button></div><div className="map-preview"><div className="map-roads"><i /><i /><i /><i /><i /><span className="map-pin"><MapPin size={19} /></span></div><div className="map-label"><span><MapPin size={15} /><b>{item.location}</b></span><small>Aniq manzil bandlov tasdiqlangandan so‘ng beriladi</small></div></div></section>\n      <section className="reviews-section"><div className="subsection-heading"><div><span className="eyebrow">Mijozlar fikri</span><h2>So‘nggi sharhlar <small>(18)</small></h2></div><button className="text-button">Barchasini ko‘rish <ArrowRight size={15} /></button></div><div className="review-grid"><Review initials="DS" name="Diyorbek S." date="2 kun oldin" text="Asbob holati rasmlardagidan ham yaxshi ekan. Egasi vaqtida olib keldi, operator ham juda tajribali." rating="5.0" /><Review initials="MA" name="Madina A." date="1 hafta oldin" text="Juda qulay servis. Bron qilish tez bo‘ldi, kelishilgan narxda hech qanday qo‘shimcha to‘lov bo‘lmadi." rating="4.8" /></div></section>
-    </div><aside className="booking-card"><div className="booking-price"><span><b>{formatPrice(item.price)}</b><small>/ kuniga</small></span><span className="booking-rating"><Star size={15} fill="currentColor" /> {item.rating}</span></div><div className="booking-card-divider" /><div className="booking-form-title">Ijara muddatini tanlang</div><div className="date-inputs"><label><small>Boshlanish kuni</small><span><CalendarDays size={16} /><input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></span></label><label><small>Tugash kuni</small><span><CalendarDays size={16} /><input type="date" value={end} min={start} onChange={(e) => setEnd(e.target.value)} /></span></label></div><div className="availability-calendar"><div className="calendar-top"><button><ChevronLeft size={15} /></button><strong>Sentabr 2026</strong><button><ChevronRight size={15} /></button></div><div className="calendar-week"><span>Du</span><span>Se</span><span>Cho</span><span>Pa</span><span>Ju</span><span>Sha</span><span>Ya</span></div><div className="calendar-days">{['31','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','1','2','3','4'].map((day, index) => <span key={`${day}-${index}`} className={`${index < 1 || index > 30 ? 'muted' : ''} ${['16','17','18'].includes(day) ? 'selected-day' : ''} ${['22','23'].includes(day) ? 'booked-day' : ''}`}>{day}</span>)}</div><div className="calendar-legend"><span><i className="selected-dot" /> Siz tanladingiz</span><span><i className="booked-dot" /> Band</span></div></div><div className="booking-summary"><span>{formatPrice(item.price)} × {days} kun</span><b>{formatPrice(total)}</b></div><p className="booking-note"><ShieldCheck size={14} /> To‘lov faqat egasi tasdiqlaganidan so‘ng amalga oshiriladi</p><button className="primary-button full-button" onClick={() => createBooking({ start, end, days, total, payment: 'Payme' })}>Band qilish <ArrowRight size={17} /></button><button className="secondary-button full-button" onClick={() => setBookingOpen(true)}>Batafsil so‘rov yuborish</button><div className="safe-note"><LockKeyhole size={13} /> Xavfsiz va ishonchli bron</div></aside></div>
+    </div><aside className="booking-card"><div className="booking-price"><span><b>{formatPrice(item.price)}</b><small>/ kuniga</small></span><span className="booking-rating"><Star size={15} fill="currentColor" /> {item.rating}</span></div><div className="booking-card-divider" /><div className="booking-form-title">Ijara muddatini tanlang</div><div className="date-inputs"><label><small>Boshlanish kuni</small><span><CalendarDays size={16} /><input type="date" min={dateISO(0)} value={start} onChange={(e) => setStart(e.target.value)} /></span></label><label><small>Tugash kuni</small><span><CalendarDays size={16} /><input type="date" value={end} min={start} onChange={(e) => setEnd(e.target.value)} /></span></label></div><div className="availability-calendar"><div className="calendar-top"><button><ChevronLeft size={15} /></button><strong>Sentabr 2026</strong><button><ChevronRight size={15} /></button></div><div className="calendar-week"><span>Du</span><span>Se</span><span>Cho</span><span>Pa</span><span>Ju</span><span>Sha</span><span>Ya</span></div><div className="calendar-days">{['31','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','1','2','3','4'].map((day, index) => <span key={`${day}-${index}`} className={`${index < 1 || index > 30 ? 'muted' : ''} ${['16','17','18'].includes(day) ? 'selected-day' : ''} ${['22','23'].includes(day) ? 'booked-day' : ''}`}>{day}</span>)}</div><div className="calendar-legend"><span><i className="selected-dot" /> Siz tanladingiz</span><span><i className="booked-dot" /> Band</span></div></div><div className="booking-summary"><span>{formatPrice(item.price)} × {days} kun</span><b>{formatPrice(total)}</b></div><p className="booking-note"><ShieldCheck size={14} /> To‘lov faqat egasi tasdiqlaganidan so‘ng amalga oshiriladi</p><button className="primary-button full-button" onClick={() => createBooking({ start, end, days, total, payment: 'Payme' })}>Band qilish <ArrowRight size={17} /></button><button className="secondary-button full-button" onClick={() => setBookingOpen(true)}>Batafsil so‘rov yuborish</button><div className="safe-note"><LockKeyhole size={13} /> Xavfsiz va ishonchli bron</div></aside></div>
   </section>;
 }
 
@@ -414,16 +442,22 @@ function Spec({ icon, label, value }) { const Icon = icon === 'calendar' ? Calen
 function Review({ initials, name, date, text, rating }) { return <div className="review-card"><div className="review-head"><span className="avatar">{initials}</span><span><strong>{name}</strong><small>{date}</small></span><b><Star size={13} fill="currentColor" /> {rating}</b></div><p>“{text}”</p></div>; }
 
 function BookingModal({ item, close, confirm }) {
-  const [start, setStart] = useState('2026-09-16'); const [end, setEnd] = useState('2026-09-18'); const [payment, setPayment] = useState('Payme'); const days = calculateDays(start, end); const total = days * item.price;
-  return <Modal close={close} title="Band qilish so‘rovi" subtitle="Ma’lumotlarni tekshirib, so‘rovni yuboring."><div className="modal-equipment"><img src={item.image} alt="" /><span><strong>{item.name}</strong><small><MapPin size={13} /> {item.location}</small></span><b>{formatPrice(item.price)}<small>/ kuniga</small></b></div><div className="modal-form-grid"><label>Qabul qilish sanasi<input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Qaytarish sanasi<input type="date" min={start} value={end} onChange={(e) => setEnd(e.target.value)} /></label></div><label className="modal-label">To‘lov usuli</label><div className="payment-options"><button className={payment === 'Payme' ? 'selected' : ''} onClick={() => setPayment('Payme')}><span className="payme-logo">P</span><span><b>Payme</b><small>To‘lov tasdiqdan keyin</small></span>{payment === 'Payme' && <CheckCircle2 size={17} />}</button><button className={payment === 'Click' ? 'selected' : ''} onClick={() => setPayment('Click')}><span className="click-logo">C</span><span><b>Click</b><small>To‘lov tasdiqdan keyin</small></span>{payment === 'Click' && <CheckCircle2 size={17} />}</button><button className={payment === 'Naqd' ? 'selected' : ''} onClick={() => setPayment('Naqd')}><span className="cash-logo"><WalletCards size={18} /></span><span><b>Naqd pul</b><small>Asbob egasi bilan kelishiladi</small></span>{payment === 'Naqd' && <CheckCircle2 size={17} />}</button></div><div className="modal-total"><span>Jami ({days} kun)</span><strong>{formatPrice(total)}</strong></div><button className="primary-button full-button" onClick={() => confirm({ start, end, days, total, payment })}>So‘rovni yuborish <ArrowRight size={17} /></button><p className="modal-terms">So‘rov yuborish orqali foydalanish shartlariga rozilik bildirasiz.</p></Modal>;
+  const [start, setStart] = useState(() => dateISO(2)); const [end, setEnd] = useState(() => dateISO(4)); const [payment, setPayment] = useState('Payme'); const days = calculateDays(start, end); const total = days * item.price;
+  return <Modal close={close} title="Band qilish so‘rovi" subtitle="Ma’lumotlarni tekshirib, so‘rovni yuboring."><div className="modal-equipment"><img src={item.image} alt="" /><span><strong>{item.name}</strong><small><MapPin size={13} /> {item.location}</small></span><b>{formatPrice(item.price)}<small>/ kuniga</small></b></div><div className="modal-form-grid"><label>Qabul qilish sanasi<input type="date" min={dateISO(0)} value={start} onChange={(e) => setStart(e.target.value)} /></label><label>Qaytarish sanasi<input type="date" min={start} value={end} onChange={(e) => setEnd(e.target.value)} /></label></div><label className="modal-label">To‘lov usuli</label><div className="payment-options"><button className={payment === 'Payme' ? 'selected' : ''} onClick={() => setPayment('Payme')}><span className="payme-logo">P</span><span><b>Payme</b><small>To‘lov tasdiqdan keyin</small></span>{payment === 'Payme' && <CheckCircle2 size={17} />}</button><button className={payment === 'Click' ? 'selected' : ''} onClick={() => setPayment('Click')}><span className="click-logo">C</span><span><b>Click</b><small>To‘lov tasdiqdan keyin</small></span>{payment === 'Click' && <CheckCircle2 size={17} />}</button><button className={payment === 'Naqd' ? 'selected' : ''} onClick={() => setPayment('Naqd')}><span className="cash-logo"><WalletCards size={18} /></span><span><b>Naqd pul</b><small>Asbob egasi bilan kelishiladi</small></span>{payment === 'Naqd' && <CheckCircle2 size={17} />}</button></div><div className="modal-total"><span>Jami ({days} kun)</span><strong>{formatPrice(total)}</strong></div><button className="primary-button full-button" onClick={() => confirm({ start, end, days, total, payment })}>So‘rovni yuborish <ArrowRight size={17} /></button><p className="modal-terms">So‘rov yuborish orqali foydalanish shartlariga rozilik bildirasiz.</p></Modal>;
 }
 
 function ListingModal({ close, submit }) {
-  const [form, setForm] = useState({ name: '', category: 'Shurupovyor', location: 'Toshkent shahri', price: '', year: '2024', power: '', capacity: '', description: '', image: '', imageName: '' });
+  const [form, setForm] = useState({ name: '', category: 'Shurupovyor', location: 'Toshkent shahri', price: '', year: '2024', power: '', capacity: '', description: '', image: '', imageName: '', mediaType: '' });
+  const [uploadError, setUploadError] = useState('');
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
   const chooseFile = (event) => {
     const file = event.target.files?.[0];
-    if (file) setForm((current) => ({ ...current, image: URL.createObjectURL(file), imageName: file.name }));
+    if (!file) return;
+    const allowed = file.type.startsWith('image/') || file.type.startsWith('video/');
+    if (!allowed) { setUploadError('Faqat JPG, PNG yoki MP4 fayl tanlang.'); return; }
+    if (file.size > 10 * 1024 * 1024) { setUploadError('Fayl hajmi 10 MB dan oshmasin.'); return; }
+    setUploadError('');
+    setForm((current) => ({ ...current, image: file.type.startsWith('image/') ? URL.createObjectURL(file) : '', imageName: file.name, mediaType: file.type }));
   };
   const presets = ['Gipsokarton montaji', 'Beton va g‘isht', 'Metall kesish', 'Uy ta’miri'];
   return <Modal close={close} title="Yangi e’lon joylash" subtitle="Asbobingiz haqida aniq ma’lumot bering — mijozlar tezroq topadi.">
@@ -440,8 +474,8 @@ function ListingModal({ close, submit }) {
     </div>
     <label className="full-label">Qisqa tavsif<textarea rows="3" placeholder="Asbob holati, qanday ishlarga mosligi..." value={form.description} onChange={(e) => update('description', e.target.value)} /></label>
     <div className="description-presets"><small>Tayyor qo‘shish:</small>{presets.map((preset) => <button type="button" key={preset} onClick={() => update('description', `${preset} uchun yaxshi holatda. Toza va ishlashga tayyor.`)}>{preset}</button>)}</div>
-    <label className="upload-zone"><input type="file" accept="image/*,video/*" onChange={chooseFile} />{form.image ? <img className="upload-preview" src={form.image} alt="Tanlangan asbob" /> : <UploadCloud size={23} />}<strong>{form.imageName || 'Rasm va videolarni shu yerga tashlang'}</strong><small>yoki <u>kompyuterdan tanlang</u> · JPG, PNG, MP4 · 10 MB gacha</small></label>
-    <div className="modal-actions"><button className="secondary-button" onClick={close}>Bekor qilish</button><button className="primary-button" disabled={!form.name || !form.price} onClick={() => submit(form)}>E’lonni davom ettirish <ArrowRight size={16} /></button></div>
+    <label className="upload-zone"><input type="file" accept="image/*,video/*" onChange={chooseFile} />{form.image ? <img className="upload-preview" src={form.image} alt="Tanlangan asbob" /> : <UploadCloud size={23} />}<strong>{form.imageName || 'Rasm va videolarni shu yerga tashlang'}</strong><small>yoki <u>kompyuterdan tanlang</u> · JPG, PNG, MP4 · 10 MB gacha</small>{uploadError && <em className="upload-error">{uploadError}</em>}</label>
+    <div className="modal-actions"><button className="secondary-button" onClick={close}>Bekor qilish</button><button className="primary-button" disabled={!form.name.trim() || !form.price || Number(form.price) <= 0} onClick={() => submit(form)}>E’lonni davom ettirish <ArrowRight size={16} /></button></div>
   </Modal>;
 }
 
@@ -453,10 +487,31 @@ function RegionModal({ value, close, select }) {
 
 function AuthModal({ close, notify, onSuccess }) {
   const [tab, setTab] = useState('login');
-  return <Modal close={close} title={tab === 'login' ? 'Xush kelibsiz' : 'Hisob yarating'} subtitle={tab === 'login' ? 'Kabinetga kirish uchun ma’lumotlaringizni kiriting.' : 'ArendaTexnika hamjamiyatiga qo‘shiling.'}><div className="auth-tabs"><button className={tab === 'login' ? 'active' : ''} onClick={() => setTab('login')}>Kirish</button><button className={tab === 'signup' ? 'active' : ''} onClick={() => setTab('signup')}>Ro‘yxatdan o‘tish</button></div><label className="full-label">Telefon raqami yoki email<input placeholder="+998 90 123 45 67" /></label>{tab === 'signup' && <label className="full-label">To‘liq ism<input placeholder="Ismingiz va familiyangiz" /></label>}<label className="full-label">Parol<div className="input-with-icon"><input type="password" placeholder="••••••••" /><LockKeyhole size={16} /></div></label>{tab === 'login' && <button className="forgot-link">Parolni unutdingizmi?</button>}<button className="primary-button full-button" onClick={() => { onSuccess(); }}>Davom etish <ArrowRight size={17} /></button><div className="or-divider"><span>yoki</span></div><button className="google-button" onClick={onSuccess}><span>G</span> Google orqali davom etish</button><p className="modal-terms">Davom etish orqali foydalanish shartlari va maxfiylik siyosatiga rozilik bildirasiz.</p></Modal>;
+  const [identifier, setIdentifier] = useState('');
+  const [name, setName] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const valid = identifier.trim().length >= 5 && password.length >= 6 && (tab === 'login' || name.trim().length >= 2);
+  const submitAuth = () => {
+    if (!identifier.trim()) return setError('Telefon raqami yoki emailni kiriting.');
+    if (tab === 'signup' && name.trim().length < 2) return setError('Ism va familiyangizni kiriting.');
+    if (password.length < 6) return setError('Parol kamida 6 ta belgidan iborat bo‘lsin.');
+    onSuccess();
+  };
+  return <Modal close={close} title={tab === 'login' ? 'Xush kelibsiz' : 'Hisob yarating'} subtitle={tab === 'login' ? 'Band qilish va arendator bilan yozishish uchun kiring.' : 'Asbob ijarasi hamjamiyatiga qo‘shiling.'}>
+    <div className="auth-tabs"><button className={tab === 'login' ? 'active' : ''} onClick={() => { setTab('login'); setError(''); }}>Kirish</button><button className={tab === 'signup' ? 'active' : ''} onClick={() => { setTab('signup'); setError(''); }}>Ro‘yxatdan o‘tish</button></div>
+    <div className="security-note"><ShieldCheck size={15} /><span><b>Ma’lumotlaringiz himoyalangan</b><small>Biz parolni chat yoki xabarlarda hech qachon so‘ramaymiz.</small></span></div>
+    <label className="full-label">Telefon raqami yoki email<input autoComplete="username" value={identifier} onChange={(event) => { setIdentifier(event.target.value); setError(''); }} placeholder="+998 90 123 45 67" /></label>
+    {tab === 'signup' && <label className="full-label">To‘liq ism<input autoComplete="name" value={name} onChange={(event) => { setName(event.target.value); setError(''); }} placeholder="Ismingiz va familiyangiz" /></label>}
+    <label className="full-label">Parol<div className="input-with-icon"><input autoComplete={tab === 'login' ? 'current-password' : 'new-password'} type="password" value={password} onChange={(event) => { setPassword(event.target.value); setError(''); }} placeholder="Kamida 6 ta belgi" /><LockKeyhole size={16} /></div></label>
+    {error && <p className="form-error" role="alert"><Info size={14} /> {error}</p>}
+    {tab === 'login' && <button className="forgot-link">Parolni unutdingizmi?</button>}
+    <button className="primary-button full-button" disabled={!valid} onClick={submitAuth}>{tab === 'login' ? 'Hisobga kirish' : 'Hisob yaratish'} <ArrowRight size={17} /></button>
+    <div className="or-divider"><span>yoki</span></div><button className="google-button" onClick={onSuccess}><span>G</span> Google orqali davom etish</button><p className="modal-terms">Davom etish orqali foydalanish shartlari va maxfiylik siyosatiga rozilik bildirasiz.</p>
+  </Modal>;
 }
 
-function Modal({ close, title, subtitle, children }) { return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><div className="modal"><button className="modal-close" onClick={close}><X size={19} /></button><div className="modal-heading"><span className="modal-kicker"><Sparkles size={13} /> ArendaTexnika</span><h2>{title}</h2><p>{subtitle}</p></div>{children}</div></div>; }
+function Modal({ close, title, subtitle, children }) { return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><div className="modal" role="dialog" aria-modal="true" aria-label={title}><button className="modal-close" aria-label="Oynani yopish" onClick={close}><X size={19} /></button><div className="modal-heading"><span className="modal-kicker"><Sparkles size={13} /> ArendaTexnika</span><h2>{title}</h2><p>{subtitle}</p></div>{children}</div></div>; }
 
 function Dashboard({ bookings, equipment, goTo, setListingOpen, notify, initialTab = 'overview' }) {
   const [tab, setTab] = useState(initialTab);
@@ -486,4 +541,17 @@ function AdminOrders({ bookings, notify }) { return <><div className="admin-head
 
 function Footer({ goTo }) { return <footer className="site-footer"><div className="page-width footer-top"><div className="footer-brand"><button className="brand" onClick={() => goTo('home')}><span className="brand-mark"><img src="/assets/arendatexnika-logo.png" alt="" /></span><span><strong>Arenda</strong><em>Texnika</em></span></button><p>Qurilish ishingizga kerakli asbob — bir necha klikda.</p><div className="social-row"><span>in</span><span>f</span><span>tg</span><span>◎</span></div></div><div className="footer-links"><div><strong>Platforma</strong><button onClick={() => goTo('catalog')}>Katalog</button><button>Qanday ishlaydi?</button><button>Asbob joylash</button><button>Hamkorlik</button></div><div><strong>Yordam</strong><button>Yordam markazi</button><button>Foydalanish shartlari</button><button>Maxfiylik siyosati</button><button>Biz bilan bog‘lanish</button></div><div className="footer-contact"><strong>Aloqa</strong><a href="tel:+998712000000"><Phone size={14} /> +998 71 200 00 00</a><a href="mailto:hello@arendatexnika.uz"><Mail size={14} /> hello@arendatexnika.uz</a><small>Toshkent shahri, Yunusobod tumani</small></div></div></div><div className="page-width footer-bottom"><span>© 2026 ArendaTexnika. Barcha huquqlar himoyalangan.</span><span><span className="online-dot" /> Platforma faol</span><span>O‘zbekistonda yaratilgan <span>♥</span></span></div></footer>; }
 
-createRoot(document.getElementById('root')).render(<App />);
+class AppErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  componentDidCatch(error) { console.error('ArendaTexnika UI error:', error); }
+  render() {
+    if (!this.state.hasError) return this.props.children;
+    return <div className="error-screen"><div className="error-card"><span className="error-mark">!</span><h1>Biror narsa xato ketdi</h1><p>Sahifani yangilab ko‘ring. Saqlangan qidiruvlaringiz yo‘qolmaydi.</p><button className="primary-button" onClick={() => window.location.reload()}>Sahifani yangilash <ArrowRight size={16} /></button></div></div>;
+  }
+}
+
+createRoot(document.getElementById('root')).render(<AppErrorBoundary><App /></AppErrorBoundary>);
