@@ -15,30 +15,27 @@ Production build:
 npm run build
 ```
 
-## Dizayn yo‘nalishi
+## Dizayn va lokal assetlar
 
 Interfeys iOS 17 ruhida qayta ishlangan: oq va och kulrang qatlamlar, `backdrop-filter` blur, yumaloq kartalar, yengil shadow, ko‘k iOS aksent rangi va mobil-first responsive layout.
 
-Loyiha uchun vizual assetlar lokal ravishda yaratilgan va `public/assets/` ichida saqlangan:
+`public/assets/` ichida loyiha uchun maxsus yaratilgan lokal visual assetlar bor:
 
 - ArendaTexnika app-logo
-- Akkumulyatorli shurupovyor
-- Beton uchun perforator
-- Bolgarka
-- Diskli arra
-- Beton aralashtirgich
-- Payvandlash apparati
+- Kategoriya ikonkalari: shurupovyor, perforator, bolgarka, arra, beton aralashtirgich, payvandlash
+- Katalog kartalari uchun professional asbob rasmlari
 
-## Tayyorlangan modullar
+## Ishlaydigan marketplace oqimlari
 
-- Bosh sahifa: asbob qidiruvi, joylashuv/sana maydonlari, asbob kategoriyalari va tavsiya etilgan e’lonlar.
-- Katalog: qidiruv, kategoriya, hudud, narx oralig‘i va qo‘shimcha filtrlar; saralash va sevimlilar.
-- Asbob sahifasi: lokal galereya, texnik xususiyatlar, kunlik narx, mavjudlik kalendari, egasi, xarita ko‘rinishi, sharhlar va bron qilish.
-- Band qilish: sanalar bo‘yicha kunlarni hisoblash, umumiy narx va Payme, Click yoki naqd to‘lov tanlovi.
-- Foydalanuvchi kabineti: e’lonlar, buyurtmalar, faoliyat, daromad grafigi, chat va to‘lovlar tarixi.
-- Yangi e’lon joylash: asbob ma’lumotlari, narx, joylashuv, tavsif va media yuklash interfeysi.
-- Admin panel: statistika, daromad grafigi, foydalanuvchilar, e’lonlar, buyurtmalar va moderatsiya navbati.
-- Bildirishnomalar, profil menyusi, autentifikatsiya oynasi, sevimlilar va til almashtirish.
-- Mobil, planshet va desktop ekranlarga mos iOS 17 uslubidagi responsive dizayn.
+- Asbob kategoriyalari endi mahsulot fotosi emas, maxsus logo-uslubidagi ikonka bilan ko‘rsatiladi.
+- OLX uslubidagi hudud tanlash oynasi: qidirish, viloyat/shahar bo‘yicha filtrlash va tanlangan hududni header’da ko‘rsatish.
+- Asbob kartochkasi, batafsil sahifa, kunlik ijara, kalendar, narx hisoblash va Payme/Click/naqd to‘lov tanlovi.
+- Band qilish yoki arendatorga yozishdan oldin login/ro‘yxatdan o‘tish oynasi ochiladi.
+- Muvaffaqiyatli login’dan keyin foydalanuvchi kutgan amal davom etadi: bandlov yakunlanadi, arendator bilan chat ochiladi yoki e’lon formasi ochiladi.
+- Chat/messenger: arendator va ijarachi aloqasi uchun tayyor interaktiv UI.
+- E’lon egasi uchun soddalashtirilgan forma: kategoriya, viloyat, narx, quvvat, imkoniyat, tayyor tavsif shablonlari va rasm/video yuklash preview’i.
+- O‘zbek, rus va ingliz tillari uchun ishlaydigan til almashtirish tugmasi; asosiy navigatsiya va bosh sahifa matnlari tarjima qilinadi.
+- Responsive va animatsiyali UI: sahifa kirish animatsiyasi, hover states, yumshoq micro-interactions va mobil panel.
+- Admin panel: foydalanuvchilar, e’lonlar, buyurtmalar, moderatsiya, daromad grafigi va kategoriyalar statistikasi.
 
-Hozirgi versiya frontend MVP sifatida local state bilan ishlaydi. Payme/Click, SMS OTP, xarita API, fayl storage va backend ulanishi uchun server/API kalitlari qo‘shilishi kerak.
+Hozirgi versiya frontend MVP sifatida local state bilan ishlaydi. Real Payme/Click, SMS OTP, xarita API, fayl storage va backend ulanishi uchun server/API kalitlari qo‘shilishi kerak.

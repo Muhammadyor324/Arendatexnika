@@ -53,12 +53,12 @@ const equipmentSeed = [
 ];
 
 const categories = [
-  { name: 'Shurupovyortlar', short: 'Shurupovyor', count: '86 ta', color: 'blue', icon: toolImage('cordless-drill.jpg') },
-  { name: 'Perforatorlar', short: 'Perforator', count: '64 ta', color: 'teal', icon: toolImage('rotary-hammer.jpg') },
-  { name: 'Bolgarkalar', short: 'Bolgarka', count: '72 ta', color: 'orange', icon: toolImage('angle-grinder.jpg') },
-  { name: 'Arralar', short: 'Diskli arra', count: '48 ta', color: 'purple', icon: toolImage('circular-saw.jpg') },
-  { name: 'Beton uskunalari', short: 'Beton uskunasi', count: '36 ta', color: 'green', icon: toolImage('concrete-mixer.jpg') },
-  { name: 'Payvandlash', short: 'Payvandlash', count: '57 ta', color: 'gray', icon: toolImage('welding-inverter.jpg') }
+  { name: 'Shurupovyortlar', short: 'Shurupovyor', count: '86 ta', color: 'blue', icon: toolImage('icon-drill.png') },
+  { name: 'Perforatorlar', short: 'Perforator', count: '64 ta', color: 'teal', icon: toolImage('icon-perforator.png') },
+  { name: 'Bolgarkalar', short: 'Bolgarka', count: '72 ta', color: 'orange', icon: toolImage('icon-grinder.png') },
+  { name: 'Arralar', short: 'Diskli arra', count: '48 ta', color: 'purple', icon: toolImage('icon-saw.png') },
+  { name: 'Beton uskunalari', short: 'Beton uskunasi', count: '36 ta', color: 'green', icon: toolImage('icon-mixer.png') },
+  { name: 'Payvandlash', short: 'Payvandlash', count: '57 ta', color: 'gray', icon: toolImage('icon-welder.png') }
 ];
 
 const initialBookings = [
@@ -72,6 +72,27 @@ const calculateDays = (start, end) => {
   if (!start || !end) return 1;
   const diff = (new Date(`${end}T00:00:00`) - new Date(`${start}T00:00:00`)) / 86400000;
   return Math.max(1, Math.floor(diff) + 1);
+};
+
+const regions = [
+  { name: 'Barcha viloyatlar', count: '360+' },
+  { name: 'Toshkent shahri', count: '128' },
+  { name: 'Toshkent viloyati', count: '74' },
+  { name: 'Samarqand viloyati', count: '42' },
+  { name: 'Farg‘ona viloyati', count: '31' },
+  { name: 'Andijon viloyati', count: '26' },
+  { name: 'Namangan viloyati', count: '22' },
+  { name: 'Qashqadaryo viloyati', count: '19' },
+  { name: 'Buxoro viloyati', count: '18' },
+  { name: 'Xorazm viloyati', count: '14' },
+  { name: 'Navoiy viloyati', count: '11' },
+  { name: 'Surxondaryo viloyati', count: '9' }
+];
+
+const translations = {
+  UZ: { home: 'Bosh sahifa', catalog: 'Katalog', how: 'Qanday ishlaydi?', help: 'Yordam', login: 'Kirish', allRegions: 'Barcha viloyatlar', search: 'Qidirish', chooseRegion: 'Hududingizni tanlang', featured: 'Tavsiya etilgan asboblar', categories: 'Kategoriyalar', categoryQuestion: 'Qaysi asbob kerak?', all: 'Barchasini ko‘rish', heroLead: 'Ustalar uchun', heroAccent: 'to‘g‘ri asbob.', heroDesc: 'Kerakli asbobni toping, sanalarni belgilang va ishingizni kechiktirmang. Ishonchli egalar, aniq narxlar.', startSearch: 'Qidirishni boshlash', owner: 'Sizda asbob bormi?', ownerTitle: 'Asbobingiz bekor turmasin.' },
+  RU: { home: 'Главная', catalog: 'Каталог', how: 'Как это работает?', help: 'Помощь', login: 'Войти', allRegions: 'Все регионы', search: 'Поиск', chooseRegion: 'Выберите регион', featured: 'Рекомендуемые инструменты', categories: 'Категории', categoryQuestion: 'Какой инструмент нужен?', all: 'Смотреть все', heroLead: 'Для мастеров —', heroAccent: 'нужный инструмент.', heroDesc: 'Найдите инструмент, выберите даты и не откладывайте работу. Надёжные владельцы, честные цены.', startSearch: 'Начать поиск', owner: 'У вас есть инструмент?', ownerTitle: 'Пусть инструмент приносит доход.' },
+  EN: { home: 'Home', catalog: 'Catalog', how: 'How it works', help: 'Help', login: 'Sign in', allRegions: 'All regions', search: 'Search', chooseRegion: 'Choose your region', featured: 'Recommended tools', categories: 'Categories', categoryQuestion: 'What tool do you need?', all: 'View all', heroLead: 'For every builder —', heroAccent: 'the right tool.', heroDesc: 'Find the tool you need, choose your dates and keep your project moving. Trusted owners, clear prices.', startSearch: 'Start searching', owner: 'Do you own a tool?', ownerTitle: 'Let your tools earn.' }
 };
 
 function App() {
@@ -89,6 +110,11 @@ function App() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [listingOpen, setListingOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState(null);
+  const [pendingListing, setPendingListing] = useState(false);
+  const [dashboardStartTab, setDashboardStartTab] = useState('overview');
+  const [regionOpen, setRegionOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -96,10 +122,12 @@ function App() {
   const [lang, setLang] = useState('UZ');
 
   const selectedEquipment = equipment.find((item) => item.id === selectedId) || equipment[0];
+  const copy = translations[lang];
   const filteredEquipment = useMemo(() => equipment.filter((item) => {
     const matchesText = !search || `${item.name} ${item.category} ${item.location}`.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category === 'Barchasi' || item.category === category;
-    const matchesLocation = !location || item.location.toLowerCase().includes(location.toLowerCase());
+    const normalizedLocation = location.toLowerCase().replace(' viloyati', '').replace(' shahri', '');
+    const matchesLocation = !location || item.location.toLowerCase().includes(normalizedLocation);
     const matchesPrice = item.price <= maxPrice;
     const matchesFavorite = !favoritesOnly || favorites.has(item.id);
     return matchesText && matchesCategory && matchesLocation && matchesPrice && matchesFavorite;
@@ -147,14 +175,55 @@ function App() {
     setSearch('');
     goTo('catalog');
   };
-  const createBooking = (details) => {
+  const selectRegion = (value) => {
+    setLocation(value === 'Barcha viloyatlar' ? '' : value);
+    setRegionOpen(false);
+    notify(value === 'Barcha viloyatlar' ? 'Barcha hududlar ko‘rsatildi' : `${value} bo‘yicha e’lonlar ko‘rsatildi`);
+  };
+  const finalizeBooking = (details) => {
     const booking = {
       id: `AT-${Math.floor(2000 + Math.random() * 7000)}`,
       equipment: selectedEquipment, ...details, status: 'Kutilmoqda'
     };
     setBookings((current) => [booking, ...current]);
     setBookingOpen(false);
+    setPendingBooking(null);
+    setDashboardStartTab('bookings');
     notify('So‘rovingiz egasiga yuborildi. Tez orada javob keladi.');
+    goTo('dashboard');
+  };
+  const createBooking = (details) => {
+    if (!isAuthenticated) {
+      setPendingBooking(details);
+      setAuthOpen(true);
+      notify('Band qilish uchun avval hisobingizga kiring.');
+      return;
+    }
+    finalizeBooking(details);
+  };
+  const completeAuth = () => {
+    setIsAuthenticated(true);
+    setAuthOpen(false);
+    notify('Hisobingizga muvaffaqiyatli kirdingiz.');
+    if (pendingBooking) finalizeBooking(pendingBooking);
+    if (pendingListing) { setPendingListing(false); setListingOpen(true); }
+  };
+  const openListing = () => {
+    if (!isAuthenticated) {
+      setPendingListing(true);
+      setAuthOpen(true);
+      notify('E’lon joylash uchun avval hisob yarating.');
+      return;
+    }
+    setListingOpen(true);
+  };
+  const contactOwner = () => {
+    if (!isAuthenticated) {
+      setAuthOpen(true);
+      notify('Arendator bilan yozishish uchun hisobga kiring.');
+      return;
+    }
+    setDashboardStartTab('messages');
     goTo('dashboard');
   };
   const addListing = (form) => {
@@ -181,23 +250,23 @@ function App() {
             <span><strong>Arenda</strong><em>Texnika</em></span>
           </button>
           <nav className={`main-nav ${mobileMenuOpen ? 'is-open' : ''}`}>
-            <button className={page === 'home' ? 'active' : ''} onClick={() => goTo('home')}>Bosh sahifa</button>
-            <button className={page === 'catalog' || page === 'detail' ? 'active' : ''} onClick={() => goTo('catalog')}>Katalog</button>
-            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>Qanday ishlaydi?</button>
-            <button onClick={() => notify('Yordam markazi tez orada ishga tushadi.')}>Yordam</button>
+            <button className={page === 'home' ? 'active' : ''} onClick={() => goTo('home')}>{copy.home}</button>
+            <button className={page === 'catalog' || page === 'detail' ? 'active' : ''} onClick={() => goTo('catalog')}>{copy.catalog}</button>
+            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}>{copy.how}</button>
+            <button onClick={() => notify('Yordam markazi tez orada ishga tushadi.')}>{copy.help}</button>
           </nav>
           <div className="header-actions">
             <button className="language-button" onClick={() => { setLang(lang === 'UZ' ? 'RU' : lang === 'RU' ? 'EN' : 'UZ'); notify(`Til: ${lang === 'UZ' ? 'Русский' : lang === 'RU' ? 'English' : 'O‘zbekcha'}`); }}><Globe2 size={16} /> {lang}<ChevronDown size={13} /></button>
+            <button className="region-chip" onClick={() => setRegionOpen(true)}><MapPin size={15} /><span>{location || copy.allRegions}</span><ChevronDown size={13} /></button>
             <button className="icon-button desktop-only" onClick={openFavorites} aria-label="Sevimlilar"><Heart size={19} /></button>
             <div className="popover-anchor">
               <button className="icon-button" onClick={() => { setNotificationsOpen(!notificationsOpen); setUserMenuOpen(false); }} aria-label="Bildirishnomalar"><Bell size={19} /><span className="notification-dot" /></button>
               {notificationsOpen && <NotificationPopover />}
             </div>
             <div className="user-area">
-              <button className="user-chip" onClick={() => { setUserMenuOpen(!userMenuOpen); setNotificationsOpen(false); }}>
+              {isAuthenticated ? <><button className="user-chip" onClick={() => { setUserMenuOpen(!userMenuOpen); setNotificationsOpen(false); }}>
                 <span className="avatar avatar-small">MK</span><span className="user-chip-name">Murod Karimov</span><ChevronDown size={14} />
-              </button>
-              {userMenuOpen && <UserPopover goTo={goTo} openAuth={() => setAuthOpen(true)} />}
+              </button>{userMenuOpen && <UserPopover goTo={goTo} openAuth={() => setAuthOpen(true)} />}</> : <button className="login-button" onClick={() => setAuthOpen(true)}><UserCircle size={16} /> {copy.login}</button>}
             </div>
             <button className="mobile-menu-button" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Menyu">{mobileMenuOpen ? <X /> : <Menu />}</button>
           </div>
@@ -205,17 +274,18 @@ function App() {
       </header>
 
       <main>
-        {page === 'home' && <Home searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} chooseCategory={chooseCategory} openDetail={openDetail} toggleFavorite={toggleFavorite} favorites={favorites} setListingOpen={setListingOpen} goTo={goTo} />}
-        {page === 'catalog' && <Catalog items={filteredEquipment} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} category={category} setCategory={(value) => { setCategory(value); setFavoritesOnly(false); }} location={location} setLocation={setLocation} maxPrice={maxPrice} setMaxPrice={setMaxPrice} favorites={favorites} toggleFavorite={toggleFavorite} openDetail={openDetail} favoritesOnly={favoritesOnly} setFavoritesOnly={setFavoritesOnly} />}
-        {page === 'detail' && <Detail item={selectedEquipment} isFavorite={favorites.has(selectedEquipment.id)} toggleFavorite={toggleFavorite} goTo={goTo} setBookingOpen={setBookingOpen} createBooking={createBooking} notify={notify} />}
-        {page === 'dashboard' && <Dashboard bookings={bookings} equipment={equipment} goTo={goTo} setListingOpen={setListingOpen} notify={notify} />}
+        {page === 'home' && <Home copy={copy} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} chooseCategory={chooseCategory} openDetail={openDetail} toggleFavorite={toggleFavorite} favorites={favorites} setListingOpen={openListing} goTo={goTo} location={location} openRegionPicker={() => setRegionOpen(true)} />}
+        {page === 'catalog' && <Catalog copy={copy} items={filteredEquipment} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} category={category} setCategory={(value) => { setCategory(value); setFavoritesOnly(false); }} location={location} setLocation={setLocation} openRegionPicker={() => setRegionOpen(true)} maxPrice={maxPrice} setMaxPrice={setMaxPrice} favorites={favorites} toggleFavorite={toggleFavorite} openDetail={openDetail} favoritesOnly={favoritesOnly} setFavoritesOnly={setFavoritesOnly} />}
+        {page === 'detail' && <Detail item={selectedEquipment} isFavorite={favorites.has(selectedEquipment.id)} toggleFavorite={toggleFavorite} goTo={goTo} setBookingOpen={setBookingOpen} createBooking={createBooking} notify={notify} contactOwner={contactOwner} />}
+        {page === 'dashboard' && <Dashboard bookings={bookings} equipment={equipment} goTo={goTo} setListingOpen={openListing} notify={notify} initialTab={dashboardStartTab} />}
         {page === 'admin' && <Admin equipment={equipment} bookings={bookings} notify={notify} />}
       </main>
 
       {page !== 'admin' && <Footer goTo={goTo} />}
       {bookingOpen && <BookingModal item={selectedEquipment} close={() => setBookingOpen(false)} confirm={createBooking} />}
       {listingOpen && <ListingModal close={() => setListingOpen(false)} submit={addListing} />}
-      {authOpen && <AuthModal close={() => setAuthOpen(false)} notify={notify} />}
+      {regionOpen && <RegionModal value={location || 'Barcha viloyatlar'} close={() => setRegionOpen(false)} select={selectRegion} />}
+      {authOpen && <AuthModal close={() => setAuthOpen(false)} notify={notify} onSuccess={completeAuth} />}
       {toast && <div className={`toast ${toast.type}`}><span className="toast-icon"><Check size={16} /></span>{toast.message}<button onClick={() => setToast(null)}><X size={15} /></button></div>}
     </div>
   );
@@ -235,32 +305,32 @@ function UserPopover({ goTo, openAuth }) {
     <div className="popover-user"><span className="avatar">MK</span><span><strong>Murod Karimov</strong><small>Ijarachi va egasi</small></span></div>
     <button onClick={() => goTo('dashboard')}><LayoutDashboard size={16} /> Kabinetim</button>
     <button onClick={() => goTo('dashboard')}><Heart size={16} /> Sevimlilarim</button>
-    <button onClick={() => goTo('admin')}><BarChart3 size={16} /> Admin panel <span className="menu-badge">demo</span></button>
+    <button onClick={() => goTo('admin')}><BarChart3 size={16} /> Admin panel</button>
     <button onClick={() => openAuth()}><Settings size={16} /> Profil sozlamalari</button>
     <div className="popover-divider" />
     <button className="logout"><LockKeyhole size={16} /> Chiqish</button>
   </div>;
 }
 
-function Home({ searchDraft, setSearchDraft, submitSearch, chooseCategory, openDetail, toggleFavorite, favorites, setListingOpen, goTo }) {
+function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory, openDetail, toggleFavorite, favorites, setListingOpen, goTo, location, openRegionPicker }) {
   return <>
     <section className="hero-section">
       <div className="hero-noise" />
       <div className="hero-inner page-width">
         <div className="hero-copy">
           <div className="eyebrow light"><span className="pulse-dot" /> O‘zbekistondagi #1 asboblar marketplace</div>
-          <h1>Ustalar uchun<br /><span>to‘g‘ri asbob.</span></h1>
-          <p>Kerakli asbobni toping, sanalarni belgilang va ishingizni kechiktirmang. Ishonchli egalar, aniq narxlar.</p>
+          <h1>{copy.heroLead}<br /><span>{copy.heroAccent}</span></h1>
+          <p>{copy.heroDesc}</p>
           <div className="hero-proof"><span className="proof-avatars"><i>AS</i><i>BK</i><i>NM</i><i>+</i></span><span><strong>2,400+</strong> usta allaqachon tanladi</span></div>
         </div>
         <form className="search-panel" onSubmit={submitSearch}>
-          <div className="search-panel-title"><span><Search size={17} /> Asbob qidirish</span><small>360+ e’lon ichidan</small></div>
+          <div className="search-panel-title"><span><Search size={17} /> {copy.search}</span><small>360+ e’lon ichidan</small></div>
           <label className="search-field"><span className="field-icon"><Search size={18} /></span><span><small>Asbob turi</small><input value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="Masalan, shurupovyor" /></span></label>
           <div className="search-row">
-            <label className="search-field compact"><span className="field-icon"><MapPin size={18} /></span><span><small>Joylashuv</small><input placeholder="Viloyat yoki shahar" /></span></label>
+            <button type="button" className="search-field compact region-field" onClick={openRegionPicker}><span className="field-icon"><MapPin size={18} /></span><span><small>Joylashuv</small><b>{location || copy.allRegions}</b></span><ChevronDown size={14} /></button>
             <label className="search-field compact"><span className="field-icon"><CalendarDays size={18} /></span><span><small>Sana</small><input placeholder="Qachon kerak?" /></span></label>
           </div>
-          <button className="primary-button search-submit" type="submit">Qidirishni boshlash <ArrowRight size={17} /></button>
+          <button className="primary-button search-submit" type="submit">{copy.startSearch} <ArrowRight size={17} /></button>
           <div className="search-foot"><ShieldCheck size={15} /> Barcha egalar tasdiqlangan</div>
         </form>
       </div>
@@ -273,12 +343,12 @@ function Home({ searchDraft, setSearchDraft, submitSearch, chooseCategory, openD
     </section>
 
     <section className="page-width section-block categories-section">
-      <div className="section-heading"><div><span className="eyebrow">Kategoriyalar</span><h2>Qaysi asbob kerak?</h2></div><button className="text-button" onClick={() => goTo('catalog')}>Barchasini ko‘rish <ArrowRight size={16} /></button></div>
+      <div className="section-heading"><div><span className="eyebrow">{copy.categories}</span><h2>{copy.categoryQuestion}</h2></div><button className="text-button" onClick={() => goTo('catalog')}>{copy.all} <ArrowRight size={16} /></button></div>
       <div className="category-grid">{categories.map((item) => <button className="category-card" key={item.name} onClick={() => chooseCategory(item.short)}><span className={`category-art ${item.color}`}><img src={item.icon} alt="" /></span><span className="category-content"><strong>{item.name}</strong><small>{item.count}</small></span><ArrowUpRight size={17} className="category-arrow" /></button>)}</div>
     </section>
 
     <section className="page-width section-block featured-section">
-      <div className="section-heading"><div><span className="eyebrow">Bugun ommabop</span><h2>Tavsiya etilgan asboblar</h2><p className="section-description">Ustalar eng ko‘p tanlayotgan, tekshirilgan asboblar.</p></div><button className="outline-button" onClick={() => goTo('catalog')}>Katalogni ko‘rish <ArrowRight size={16} /></button></div>
+      <div className="section-heading"><div><span className="eyebrow">Bugun ommabop</span><h2>{copy.featured}</h2><p className="section-description">Ustalar eng ko‘p tanlayotgan, tekshirilgan asboblar.</p></div><button className="outline-button" onClick={() => goTo('catalog')}>{copy.catalog} <ArrowRight size={16} /></button></div>
       <div className="equipment-grid">{equipmentSeed.slice(0, 3).map((item) => <EquipmentCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onFavorite={() => toggleFavorite(item.id)} onClick={() => openDetail(item.id)} />)}</div>
     </section>
 
@@ -288,7 +358,7 @@ function Home({ searchDraft, setSearchDraft, submitSearch, chooseCategory, openD
       </div>
     </section>
 
-    <section className="page-width owner-banner"><div className="owner-banner-copy"><span className="eyebrow">Sizda asbob bormi?</span><h2>Asbobingiz bekor<br />turmasin.</h2><p>E’lon joylang, minglab mijozlarga yetib boring va daromad oling.</p><button className="dark-button" onClick={() => setListingOpen(true)}>E’lon joylash <Plus size={17} /></button></div><div className="owner-banner-graphic"><div className="graphic-circle" /><div className="graphic-card card-back" /><div className="graphic-card card-front"><span className="mini-label">OYLIK DAROMAD</span><strong>+ 18.4 mln</strong><div className="mini-chart"><i /><i /><i /><i /><i /><i /><i /></div></div><span className="graphic-spark">✦</span></div></section>
+    <section className="page-width owner-banner"><div className="owner-banner-copy"><span className="eyebrow">{copy.owner}</span><h2>{copy.ownerTitle}</h2><p>E’lon joylang, minglab mijozlarga yetib boring va daromad oling.</p><button className="dark-button" onClick={() => setListingOpen(true)}>E’lon joylash <Plus size={17} /></button></div><div className="owner-banner-graphic"><div className="graphic-circle" /><div className="graphic-card card-back" /><div className="graphic-card card-front"><span className="mini-label">OYLIK DAROMAD</span><strong>+ 18.4 mln</strong><div className="mini-chart"><i /><i /><i /><i /><i /><i /><i /></div></div><span className="graphic-spark">✦</span></div></section>
   </>;
 }
 
@@ -299,14 +369,14 @@ function EquipmentCard({ item, isFavorite, onFavorite, onClick }) {
   </article>;
 }
 
-function Catalog({ items, searchDraft, setSearchDraft, submitSearch, category, setCategory, location, setLocation, maxPrice, setMaxPrice, favorites, toggleFavorite, openDetail, favoritesOnly, setFavoritesOnly }) {
+function Catalog({ copy, items, searchDraft, setSearchDraft, submitSearch, category, setCategory, location, setLocation, openRegionPicker, maxPrice, setMaxPrice, favorites, toggleFavorite, openDetail, favoritesOnly, setFavoritesOnly }) {
   const [mobileFilters, setMobileFilters] = useState(false);
   const [sort, setSort] = useState('Tavsiya etilgan');
   const sortedItems = [...items].sort((a, b) => sort === 'Arzonroq' ? a.price - b.price : sort === 'Reytingi yuqori' ? b.rating - a.rating : 0);
   return <section className="catalog-page page-width">
     <div className="breadcrumbs"><button onClick={() => window.scrollTo({ top: 0 })}>Bosh sahifa</button><ChevronRight size={14} /><span>Katalog</span></div>
-    <div className="catalog-heading"><div><span className="eyebrow">Barcha e’lonlar</span><h1>O‘zingizga mos asbobni toping</h1><p>{items.length} ta natija sizning qidiruvingiz bo‘yicha</p></div><button className="filter-toggle-button" onClick={() => setMobileFilters(!mobileFilters)}><SlidersHorizontal size={17} /> Filtrlar</button></div>
-    <div className="catalog-searchbar"><form onSubmit={submitSearch}><Search size={18} /><input value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="Asbob nomi yoki turi bo‘yicha qidiring" /><button type="submit">Qidirish</button></form><label><MapPin size={17} /><input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Joylashuv" /></label><label><CalendarDays size={17} /><span>Sanani tanlang</span><ChevronDown size={14} /></label></div>
+    <div className="catalog-heading"><div><span className="eyebrow">{copy.catalog}</span><h1>{copy.categoryQuestion}</h1><p>{items.length} ta natija sizning qidiruvingiz bo‘yicha</p></div><button className="filter-toggle-button" onClick={() => setMobileFilters(!mobileFilters)}><SlidersHorizontal size={17} /> Filtrlar</button></div>
+    <div className="catalog-searchbar"><form onSubmit={submitSearch}><Search size={18} /><input value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="Asbob nomi yoki turi bo‘yicha qidiring" /><button type="submit">Qidirish</button></form><button type="button" className="catalog-region-button" onClick={openRegionPicker}><MapPin size={17} /><span>{location || 'Barcha viloyatlar'}</span><ChevronDown size={14} /></button><label><CalendarDays size={17} /><span>Sanani tanlang</span><ChevronDown size={14} /></label></div>
     <div className="catalog-layout">
       <aside className={`filter-sidebar ${mobileFilters ? 'mobile-open' : ''}`}><div className="filter-header"><strong>Filtrlar</strong><button onClick={() => { setCategory('Barchasi'); setLocation(''); setMaxPrice(1000000); setFavoritesOnly(false); }}>Tozalash</button><button className="filter-close" onClick={() => setMobileFilters(false)}><X size={18} /></button></div>
         <FilterGroup title="Asbob turi"><label className="radio-row"><input type="radio" checked={category === 'Barchasi'} onChange={() => setCategory('Barchasi')} /><span className="fake-radio" /> Barchasi <small>420</small></label>{categories.map((item) => <label className="radio-row" key={item.short}><input type="radio" checked={category === item.short} onChange={() => setCategory(item.short)} /><span className="fake-radio" /> {item.name} <small>{item.count.replace(' ta', '')}</small></label>)}</FilterGroup>
@@ -322,7 +392,7 @@ function Catalog({ items, searchDraft, setSearchDraft, submitSearch, category, s
 function FilterGroup({ title, children }) { return <div className="filter-group"><h4>{title}</h4>{children}</div>; }
 function EmptyResults({ clear }) { return <div className="empty-results"><span><Search size={23} /></span><h3>Hech narsa topilmadi</h3><p>Filtrlarni o‘zgartirib ko‘ring yoki boshqa qidiruv so‘zidan foydalaning.</p><button className="outline-button" onClick={clear}>Filtrlarni tozalash</button></div>; }
 
-function Detail({ item, isFavorite, toggleFavorite, goTo, setBookingOpen, createBooking, notify }) {
+function Detail({ item, isFavorite, toggleFavorite, goTo, setBookingOpen, createBooking, notify, contactOwner }) {
   const [activeImage, setActiveImage] = useState(0);
   const [start, setStart] = useState('2026-09-16');
   const [end, setEnd] = useState('2026-09-18');
@@ -334,7 +404,7 @@ function Detail({ item, isFavorite, toggleFavorite, goTo, setBookingOpen, create
       <div className="detail-title-row"><div><div className="detail-labels"><span className="status-pill"><i /> Hozir bo‘sh</span>{item.verified && <span className="verified-pill"><ShieldCheck size={13} /> Tasdiqlangan</span>}</div><h1>{item.name}</h1><div className="detail-meta"><span><MapPin size={16} /> {item.location}</span><span className="rating"><Star size={15} fill="currentColor" /> {item.rating} <u>{item.reviews} ta sharh</u></span></div></div><button className={`detail-favorite ${isFavorite ? 'selected' : ''}`} onClick={() => toggleFavorite(item.id)}><Heart size={18} fill={isFavorite ? 'currentColor' : 'none'} /> {isFavorite ? 'Saqlangan' : 'Saqlash'}</button></div>
       <p className="detail-description">{item.description}</p>
       <div className="spec-grid"><Spec icon="calendar" label="Ishlab chiqarilgan" value={`${item.year}-yil`} /><Spec icon="power" label="Quvvati" value={item.power} /><Spec icon="capacity" label="Hajmi" value={item.capacity} /><Spec icon="truck" label="Yetkazib berish" value="Kelishiladi" /></div>
-      <div className="detail-divider" /><section className="owner-section"><div className="subsection-heading"><div><span className="eyebrow">Asbob egasi</span><h2>Egasi haqida</h2></div><button className="text-button" onClick={() => notify('Egaga xabar yuborish oynasi tez orada.')}>Xabar yozish <MessageCircle size={15} /></button></div><div className="owner-card"><span className="avatar avatar-large">{item.ownerAvatar}</span><span className="owner-info"><strong>{item.owner}</strong><small><ShieldCheck size={13} /> Tasdiqlangan egasi · 2021-yildan beri</small></span><span className="owner-stats"><b><Star size={14} fill="currentColor" /> 4.9</b><small>18 ta sharh</small></span><ArrowRight size={17} /></div></section>
+      <div className="detail-divider" /><section className="owner-section"><div className="subsection-heading"><div><span className="eyebrow">Asbob egasi</span><h2>Egasi haqida</h2></div><button className="text-button" onClick={contactOwner}>Arendator bilan yozishish <MessageCircle size={15} /></button></div><div className="owner-card"><span className="avatar avatar-large">{item.ownerAvatar}</span><span className="owner-info"><strong>{item.owner}</strong><small><ShieldCheck size={13} /> Tasdiqlangan egasi · 2021-yildan beri</small></span><span className="owner-stats"><b><Star size={14} fill="currentColor" /> 4.9</b><small>18 ta sharh</small></span><ArrowRight size={17} /></div></section>
       <section className="location-section"><div className="subsection-heading"><div><span className="eyebrow">Joylashuv</span><h2>Asbob qayerda?</h2></div><button className="text-button" onClick={() => notify('Xarita yangi oynada ochiladi.')}>Xaritada ko‘rish <ArrowUpRight size={15} /></button></div><div className="map-preview"><div className="map-roads"><i /><i /><i /><i /><i /><span className="map-pin"><MapPin size={19} /></span></div><div className="map-label"><span><MapPin size={15} /><b>{item.location}</b></span><small>Aniq manzil bandlov tasdiqlangandan so‘ng beriladi</small></div></div></section>\n      <section className="reviews-section"><div className="subsection-heading"><div><span className="eyebrow">Mijozlar fikri</span><h2>So‘nggi sharhlar <small>(18)</small></h2></div><button className="text-button">Barchasini ko‘rish <ArrowRight size={15} /></button></div><div className="review-grid"><Review initials="DS" name="Diyorbek S." date="2 kun oldin" text="Asbob holati rasmlardagidan ham yaxshi ekan. Egasi vaqtida olib keldi, operator ham juda tajribali." rating="5.0" /><Review initials="MA" name="Madina A." date="1 hafta oldin" text="Juda qulay servis. Bron qilish tez bo‘ldi, kelishilgan narxda hech qanday qo‘shimcha to‘lov bo‘lmadi." rating="4.8" /></div></section>
     </div><aside className="booking-card"><div className="booking-price"><span><b>{formatPrice(item.price)}</b><small>/ kuniga</small></span><span className="booking-rating"><Star size={15} fill="currentColor" /> {item.rating}</span></div><div className="booking-card-divider" /><div className="booking-form-title">Ijara muddatini tanlang</div><div className="date-inputs"><label><small>Boshlanish kuni</small><span><CalendarDays size={16} /><input type="date" value={start} onChange={(e) => setStart(e.target.value)} /></span></label><label><small>Tugash kuni</small><span><CalendarDays size={16} /><input type="date" value={end} min={start} onChange={(e) => setEnd(e.target.value)} /></span></label></div><div className="availability-calendar"><div className="calendar-top"><button><ChevronLeft size={15} /></button><strong>Sentabr 2026</strong><button><ChevronRight size={15} /></button></div><div className="calendar-week"><span>Du</span><span>Se</span><span>Cho</span><span>Pa</span><span>Ju</span><span>Sha</span><span>Ya</span></div><div className="calendar-days">{['31','1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','1','2','3','4'].map((day, index) => <span key={`${day}-${index}`} className={`${index < 1 || index > 30 ? 'muted' : ''} ${['16','17','18'].includes(day) ? 'selected-day' : ''} ${['22','23'].includes(day) ? 'booked-day' : ''}`}>{day}</span>)}</div><div className="calendar-legend"><span><i className="selected-dot" /> Siz tanladingiz</span><span><i className="booked-dot" /> Band</span></div></div><div className="booking-summary"><span>{formatPrice(item.price)} × {days} kun</span><b>{formatPrice(total)}</b></div><p className="booking-note"><ShieldCheck size={14} /> To‘lov faqat egasi tasdiqlaganidan so‘ng amalga oshiriladi</p><button className="primary-button full-button" onClick={() => createBooking({ start, end, days, total, payment: 'Payme' })}>Band qilish <ArrowRight size={17} /></button><button className="secondary-button full-button" onClick={() => setBookingOpen(true)}>Batafsil so‘rov yuborish</button><div className="safe-note"><LockKeyhole size={13} /> Xavfsiz va ishonchli bron</div></aside></div>
   </section>;
@@ -349,20 +419,47 @@ function BookingModal({ item, close, confirm }) {
 }
 
 function ListingModal({ close, submit }) {
-  const [form, setForm] = useState({ name: '', category: 'Shurupovyor', location: 'Toshkent shahri', price: '', year: '2024', power: '', capacity: '', description: '' });
+  const [form, setForm] = useState({ name: '', category: 'Shurupovyor', location: 'Toshkent shahri', price: '', year: '2024', power: '', capacity: '', description: '', image: '', imageName: '' });
   const update = (key, value) => setForm((current) => ({ ...current, [key]: value }));
-  return <Modal close={close} title="Yangi e’lon joylash" subtitle="Asbobingiz haqida aniq ma’lumot bering — mijozlar tezroq topadi."><div className="listing-progress"><span className="active"><b>1</b> Asosiy ma’lumotlar</span><i /><span><b>2</b> Rasmlar</span><i /><span><b>3</b> Tekshirish</span></div><div className="modal-form-grid"><label>Asbob nomi *<input placeholder="Masalan, Bosch GBH 2-28" value={form.name} onChange={(e) => update('name', e.target.value)} /></label><label>Kategoriya *<select value={form.category} onChange={(e) => update('category', e.target.value)}>{categories.map((item) => <option key={item.short}>{item.short}</option>)}</select></label><label>Joylashuv *<select value={form.location} onChange={(e) => update('location', e.target.value)}><option>Toshkent shahri</option><option>Toshkent viloyati</option><option>Samarqand shahri</option><option>Farg‘ona viloyati</option><option>Andijon shahri</option></select></label><label>Kunlik narx *<div className="input-with-suffix"><input type="number" placeholder="120 000" value={form.price} onChange={(e) => update('price', e.target.value)} /><span>so‘m</span></div></label><label>Ishlab chiqarilgan yil<input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} /></label><label>Quvvati<input placeholder="Masalan, 880 W" value={form.power} onChange={(e) => update('power', e.target.value)} /></label><label>Hajmi / yuk ko‘tarishi<input placeholder="Masalan, 28 mm" value={form.capacity} onChange={(e) => update('capacity', e.target.value)} /></label></div><label className="full-label">Qisqa tavsif<textarea rows="3" placeholder="Asbob holati, qanday ishlarga mosligi..." value={form.description} onChange={(e) => update('description', e.target.value)} /></label><div className="upload-zone"><UploadCloud size={23} /><strong>Rasm va videolarni shu yerga tashlang</strong><small>yoki <u>kompyuterdan tanlang</u> · JPG, PNG, MP4 · 10 MB gacha</small></div><div className="modal-actions"><button className="secondary-button" onClick={close}>Bekor qilish</button><button className="primary-button" disabled={!form.name || !form.price} onClick={() => submit(form)}>E’lonni davom ettirish <ArrowRight size={16} /></button></div></Modal>;
+  const chooseFile = (event) => {
+    const file = event.target.files?.[0];
+    if (file) setForm((current) => ({ ...current, image: URL.createObjectURL(file), imageName: file.name }));
+  };
+  const presets = ['Gipsokarton montaji', 'Beton va g‘isht', 'Metall kesish', 'Uy ta’miri'];
+  return <Modal close={close} title="Yangi e’lon joylash" subtitle="Asbobingiz haqida aniq ma’lumot bering — mijozlar tezroq topadi.">
+    <div className="listing-progress"><span className="active"><b>1</b> Ma’lumotlar</span><i /><span><b>2</b> Rasm</span><i /><span><b>3</b> Tekshirish</span></div>
+    <div className="listing-helper"><Info size={15} /><span><b>Yaxshi e’lon ko‘proq band qilinadi.</b><small>Asbob nomi, aniq narx va yaxshi rasm qo‘shing.</small></span></div>
+    <div className="modal-form-grid">
+      <label>Asbob nomi *<input placeholder="Masalan, Bosch GBH 2-28" value={form.name} onChange={(e) => update('name', e.target.value)} /></label>
+      <label>Kategoriya *<select value={form.category} onChange={(e) => update('category', e.target.value)}>{categories.map((item) => <option key={item.short}>{item.short}</option>)}</select></label>
+      <label>Joylashuv *<select value={form.location} onChange={(e) => update('location', e.target.value)}><option>Toshkent shahri</option><option>Toshkent viloyati</option><option>Samarqand shahri</option><option>Farg‘ona viloyati</option><option>Andijon viloyati</option><option>Qashqadaryo viloyati</option></select></label>
+      <label>Kunlik narx *<div className="input-with-suffix"><input type="number" placeholder="120 000" value={form.price} onChange={(e) => update('price', e.target.value)} /><span>so‘m</span></div></label>
+      <label>Ishlab chiqarilgan yil<input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} /></label>
+      <label>Quvvati<input placeholder="Masalan, 880 W" value={form.power} onChange={(e) => update('power', e.target.value)} /></label>
+      <label>Hajmi / imkoniyati<input placeholder="Masalan, 28 mm" value={form.capacity} onChange={(e) => update('capacity', e.target.value)} /></label>
+    </div>
+    <label className="full-label">Qisqa tavsif<textarea rows="3" placeholder="Asbob holati, qanday ishlarga mosligi..." value={form.description} onChange={(e) => update('description', e.target.value)} /></label>
+    <div className="description-presets"><small>Tayyor qo‘shish:</small>{presets.map((preset) => <button type="button" key={preset} onClick={() => update('description', `${preset} uchun yaxshi holatda. Toza va ishlashga tayyor.`)}>{preset}</button>)}</div>
+    <label className="upload-zone"><input type="file" accept="image/*,video/*" onChange={chooseFile} />{form.image ? <img className="upload-preview" src={form.image} alt="Tanlangan asbob" /> : <UploadCloud size={23} />}<strong>{form.imageName || 'Rasm va videolarni shu yerga tashlang'}</strong><small>yoki <u>kompyuterdan tanlang</u> · JPG, PNG, MP4 · 10 MB gacha</small></label>
+    <div className="modal-actions"><button className="secondary-button" onClick={close}>Bekor qilish</button><button className="primary-button" disabled={!form.name || !form.price} onClick={() => submit(form)}>E’lonni davom ettirish <ArrowRight size={16} /></button></div>
+  </Modal>;
 }
 
-function AuthModal({ close, notify }) {
+function RegionModal({ value, close, select }) {
+  const [query, setQuery] = useState('');
+  const visibleRegions = regions.filter((item) => item.name.toLowerCase().includes(query.toLowerCase()));
+  return <Modal close={close} title="Hududingizni tanlang" subtitle="Sizga yaqin asboblar va arendatorlarni topamiz."><div className="region-modal-search"><Search size={17} /><input autoFocus value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Viloyat yoki shaharni qidiring" /></div><div className="region-list">{visibleRegions.map((region) => <button key={region.name} className={value === region.name ? 'active' : ''} onClick={() => select(region.name)}><span className="region-list-icon"><MapPin size={16} /></span><span><b>{region.name}</b><small>{region.count} ta e’lon mavjud</small></span>{value === region.name && <CheckCircle2 size={18} />}</button>)}</div></Modal>;
+}
+
+function AuthModal({ close, notify, onSuccess }) {
   const [tab, setTab] = useState('login');
-  return <Modal close={close} title={tab === 'login' ? 'Xush kelibsiz' : 'Hisob yarating'} subtitle={tab === 'login' ? 'Kabinetga kirish uchun ma’lumotlaringizni kiriting.' : 'ArendaTexnika hamjamiyatiga qo‘shiling.'}><div className="auth-tabs"><button className={tab === 'login' ? 'active' : ''} onClick={() => setTab('login')}>Kirish</button><button className={tab === 'signup' ? 'active' : ''} onClick={() => setTab('signup')}>Ro‘yxatdan o‘tish</button></div><label className="full-label">Telefon raqami yoki email<input placeholder="+998 90 123 45 67" /></label>{tab === 'signup' && <label className="full-label">To‘liq ism<input placeholder="Ismingiz va familiyangiz" /></label>}<label className="full-label">Parol<div className="input-with-icon"><input type="password" placeholder="••••••••" /><LockKeyhole size={16} /></div></label>{tab === 'login' && <button className="forgot-link">Parolni unutdingizmi?</button>}<button className="primary-button full-button" onClick={() => { close(); notify(tab === 'login' ? 'Muvaffaqiyatli kirdingiz.' : 'Hisobingiz yaratildi.'); }}>Davom etish <ArrowRight size={17} /></button><div className="or-divider"><span>yoki</span></div><button className="google-button"><span>G</span> Google orqali davom etish</button><p className="modal-terms">Davom etish orqali foydalanish shartlari va maxfiylik siyosatiga rozilik bildirasiz.</p></Modal>;
+  return <Modal close={close} title={tab === 'login' ? 'Xush kelibsiz' : 'Hisob yarating'} subtitle={tab === 'login' ? 'Kabinetga kirish uchun ma’lumotlaringizni kiriting.' : 'ArendaTexnika hamjamiyatiga qo‘shiling.'}><div className="auth-tabs"><button className={tab === 'login' ? 'active' : ''} onClick={() => setTab('login')}>Kirish</button><button className={tab === 'signup' ? 'active' : ''} onClick={() => setTab('signup')}>Ro‘yxatdan o‘tish</button></div><label className="full-label">Telefon raqami yoki email<input placeholder="+998 90 123 45 67" /></label>{tab === 'signup' && <label className="full-label">To‘liq ism<input placeholder="Ismingiz va familiyangiz" /></label>}<label className="full-label">Parol<div className="input-with-icon"><input type="password" placeholder="••••••••" /><LockKeyhole size={16} /></div></label>{tab === 'login' && <button className="forgot-link">Parolni unutdingizmi?</button>}<button className="primary-button full-button" onClick={() => { onSuccess(); }}>Davom etish <ArrowRight size={17} /></button><div className="or-divider"><span>yoki</span></div><button className="google-button" onClick={onSuccess}><span>G</span> Google orqali davom etish</button><p className="modal-terms">Davom etish orqali foydalanish shartlari va maxfiylik siyosatiga rozilik bildirasiz.</p></Modal>;
 }
 
 function Modal({ close, title, subtitle, children }) { return <div className="modal-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) close(); }}><div className="modal"><button className="modal-close" onClick={close}><X size={19} /></button><div className="modal-heading"><span className="modal-kicker"><Sparkles size={13} /> ArendaTexnika</span><h2>{title}</h2><p>{subtitle}</p></div>{children}</div></div>; }
 
-function Dashboard({ bookings, equipment, goTo, setListingOpen, notify }) {
-  const [tab, setTab] = useState('overview');
+function Dashboard({ bookings, equipment, goTo, setListingOpen, notify, initialTab = 'overview' }) {
+  const [tab, setTab] = useState(initialTab);
   const myListings = equipment.filter((item) => item.owner === 'Murod Karimov');
   return <section className="dashboard-page page-width"><div className="dashboard-welcome"><div><span className="eyebrow">12 sentabr, 2026 · Juma</span><h1>Xush kelibsiz, Murod <span>👋</span></h1><p>Loyihalaringiz va ijaralaringizni bir joydan boshqaring.</p></div><button className="primary-button" onClick={() => setListingOpen(true)}><Plus size={17} /> E’lon joylash</button></div><div className="dashboard-layout"><aside className="dashboard-sidebar"><div className="profile-mini"><span className="avatar avatar-large">MK</span><span><strong>Murod Karimov</strong><small>Ijarachi va egasi</small></span><button><MoreHorizontal size={17} /></button></div><nav className="dashboard-nav"><button className={tab === 'overview' ? 'active' : ''} onClick={() => setTab('overview')}><LayoutDashboard size={17} /> Umumiy ko‘rinish</button><button className={tab === 'listings' ? 'active' : ''} onClick={() => setTab('listings')}><Package size={17} /> Mening e’lonlarim <b>{myListings.length}</b></button><button className={tab === 'bookings' ? 'active' : ''} onClick={() => setTab('bookings')}><CalendarCheck2 size={17} /> Buyurtmalarim <b>{bookings.length}</b></button><button className={tab === 'messages' ? 'active' : ''} onClick={() => setTab('messages')}><MessageCircle size={17} /> Xabarlar <b className="green-count">3</b></button><button className={tab === 'payments' ? 'active' : ''} onClick={() => setTab('payments')}><WalletCards size={17} /> To‘lovlar tarixi</button></nav><div className="dashboard-sidebar-bottom"><button onClick={() => notify('Profil sozlamalari tez orada qo‘shiladi.')}><Settings size={17} /> Sozlamalar</button><button onClick={() => goTo('admin')}><BarChart3 size={17} /> Admin panel</button></div></aside><div className="dashboard-content">{tab === 'overview' && <DashboardOverview bookings={bookings} myListings={myListings} setTab={setTab} notify={notify} />}{tab === 'listings' && <ListingsTab listings={myListings} setListingOpen={setListingOpen} notify={notify} />}{tab === 'bookings' && <BookingsTab bookings={bookings} />}{tab === 'messages' && <MessagesTab />}{tab === 'payments' && <PaymentsTab bookings={bookings} />}</div></div></section>;
 }
