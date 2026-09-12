@@ -1,0 +1,18 @@
+{
+  "name": "ArendaTexnika — asboblar ijarasi",
+  "short_name": "ArendaTexnika",
+  "description": "Ustalar uchun qurilish asboblarini kunlik ijaraga olish va berish marketplace'i.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#0a84ff",
+  "lang": "uz",
+  "icons": [
+    {
+      "src": "/assets/arendatexnika-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

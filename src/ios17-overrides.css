@@ -1,0 +1,35 @@
+
+/* Region picker, authentication gates and interaction polish */
+.region-chip, .login-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  max-width: 190px;
+  padding: 0 10px;
+  color: #636366;
+  border: 1px solid rgba(60,60,67,.13);
+  border-radius: 12px;
+  background: rgba(255,255,255,.72);
+  font-size: 10px;
+  font-weight: 650;
+  transition: .2s ease;
+}
+.region-chip:hover, .login-button:hover { color: #0a84ff; border-color: rgba(10,132,255,.28); background: #fff; transform: translateY(-1px); }
+.region-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.login-button { color: #fff; border: 0; background: #0a84ff; box-shadow: 0 5px 12px rgba(10,132,255,.18); }
+.search-field.region-field { width: 100%; border: 0; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.region-field > svg:last-child { color: #8e8e93; flex: 0 0 auto; }
+.region-field b { overflow: hidden; color: var(--ink); font-size: 12px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-region-button { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0 18px; color: #636366; font-size: 11px; text-align: left; }
+.catalog-region-button span { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+.catalog-region-button svg:first-child { color: #0a84ff; flex: 0 0 auto; }.catalog-region-button svg:last-child { color: #8e8e93; flex: 0 0 auto; }
+.region-modal-search { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; margin-bottom: 13px; color: #0a84ff; border-radius: 12px; background: #f2f2f7; }.region-modal-search input { width: 100%; border: 0; outline: 0; background: transparent; font-size: 12px; }.region-modal-search input::placeholder { color: #8e8e93; }
+.region-list { display: flex; flex-direction: column; max-height: 360px; margin: 0 -8px -8px; overflow: auto; }.region-list button { display: flex; align-items: center; gap: 10px; padding: 10px 8px; border-radius: 13px; text-align: left; transition: .18s ease; }.region-list button:hover, .region-list button.active { background: #eef6ff; }.region-list button > span:nth-child(2) { display: flex; flex-direction: column; gap: 4px; flex: 1; }.region-list button b { font-size: 11px; font-weight: 650; }.region-list button small { color: #8e8e93; font-size: 9px; }.region-list button > svg { color: #0a84ff; }.region-list-icon { width: 32px; height: 32px; display: grid; place-items: center; color: #0a84ff; border-radius: 10px; background: #e5f0ff; }
+.listing-helper { display: flex; align-items: flex-start; gap: 9px; padding: 10px; margin-bottom: 16px; color: #0a84ff; border: 1px solid #cce4ff; border-radius: 12px; background: #f4f9ff; }.listing-helper > span { display: flex; flex-direction: column; gap: 3px; }.listing-helper b { color: #1c1c1e; font-size: 10px; }.listing-helper small { color: #636366; font-size: 9px; }.description-presets { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 9px; }.description-presets small { color: #8e8e93; font-size: 9px; }.description-presets button { padding: 5px 8px; color: #0066cc; border-radius: 8px; background: #eef6ff; font-size: 9px; font-weight: 600; }.description-presets button:hover { background: #dcebff; }.upload-zone { position: relative; cursor: pointer; }.upload-zone input[type="file"] { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }.upload-preview { width: 68px; height: 55px; object-fit: cover; border-radius: 10px; }
+.primary-button, .dark-button, .outline-button, .secondary-button, .login-button, .region-chip, .card-action, .text-button { white-space: nowrap; }.primary-button svg, .dark-button svg, .outline-button svg, .secondary-button svg, .login-button svg, .region-chip svg { flex: 0 0 auto; }.primary-button, .dark-button, .outline-button, .secondary-button { max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+main > section { animation: pageIn .35s cubic-bezier(.2,.8,.2,1); }
+@keyframes pageIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.equipment-card, .category-card, .quick-actions button, .owner-card, .review-card { will-change: transform; }
+@media (max-width: 1050px) { .region-chip { max-width: 145px; }.region-chip span { max-width: 87px; } }
+@media (max-width: 760px) { .region-chip { display: none; }.login-button { min-height: 32px; padding: 0 9px; }.catalog-region-button { min-height: 53px; border-bottom: 1px solid var(--line); }.modal { max-height: calc(100vh - 24px); }.region-list { max-height: 46vh; } }
