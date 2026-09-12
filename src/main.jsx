@@ -51,8 +51,33 @@ const equipmentSeed = [
     rating: 4.8, reviews: 13, year: 2023, power: '250 A', capacity: '1.6–5 mm', owner: 'Energo Usta', ownerAvatar: 'EU',
     image: toolImage('welding-inverter.jpg'), gallery: [toolImage('welding-inverter.jpg')],
     verified: false, featured: false, description: 'Uy, ustaxona va qurilishdagi montaj ishlari uchun ixcham invertor payvandlash apparati.'
+  },
+  {
+    id: 7, name: 'Aluminiy narvon va iskala', category: 'Narvon va iskala', location: 'Namangan viloyati', price: 240000,
+    rating: 4.7, reviews: 8, year: 2023, power: '—', capacity: '4.5 m', owner: 'Usta Service', ownerAvatar: 'US',
+    image: toolImage('other-ladder.jpg'), gallery: [toolImage('other-ladder.jpg')],
+    verified: true, featured: false, isOther: true, description: 'Bo‘yoq, fasad va montaj ishlari uchun yengil aluminiy narvon hamda yig‘ma iskala.'
+  },
+  {
+    id: 8, name: 'Bosch GLL lazer nivo', category: 'Lazer nivo', location: 'Qashqadaryo viloyati', price: 160000,
+    rating: 4.9, reviews: 10, year: 2023, power: '12 V', capacity: '30 m', owner: 'Level Pro', ownerAvatar: 'LP',
+    image: toolImage('other-laser-level.jpg'), gallery: [toolImage('other-laser-level.jpg')],
+    verified: true, featured: false, isOther: true, description: 'Tekislash, kafel va gipsokarton montaji uchun aniq yashil nurli lazer nivo.'
+  },
+  {
+    id: 9, name: 'Honda EU22 generator', category: 'Generator', location: 'Buxoro viloyati', price: 280000,
+    rating: 4.8, reviews: 12, year: 2022, power: '2.2 kW', capacity: '15 litr', owner: 'Energo Usta', ownerAvatar: 'EU',
+    image: toolImage('other-generator.jpg'), gallery: [toolImage('other-generator.jpg')],
+    verified: true, featured: false, isOther: true, description: 'Qurilish maydonchasi va dala sharoitida barqaror elektr uchun ixcham generator.'
+  },
+  {
+    id: 10, name: 'Karcher K4 yuvish apparati', category: 'Bosimli yuvish', location: 'Toshkent shahri', price: 190000,
+    rating: 4.6, reviews: 7, year: 2022, power: '1.8 kW', capacity: '130 bar', owner: 'Clean Rent', ownerAvatar: 'CR',
+    image: toolImage('other-pressure-washer.jpg'), gallery: [toolImage('other-pressure-washer.jpg')],
+    verified: false, featured: false, isOther: true, description: 'Fasad, hovli, avtomobil va qurilishdan keyingi tozalash uchun bosimli yuvish apparati.'
   }
 ];
+const otherRentalSeed = equipmentSeed.filter((item) => item.isOther);
 
 const categories = [
   { name: 'Shurupovyortlar', short: 'Shurupovyor', count: '86 ta', color: 'blue', icon: toolImage('icon-drill.png') },
@@ -62,7 +87,11 @@ const categories = [
 ];
 const otherCategories = [
   { name: 'Diskli arralar', short: 'Diskli arra', count: '48 ta', color: 'purple', icon: toolImage('icon-saw.png') },
-  { name: 'Payvandlash', short: 'Payvandlash', count: '57 ta', color: 'gray', icon: toolImage('icon-welder.png') }
+  { name: 'Payvandlash', short: 'Payvandlash', count: '57 ta', color: 'gray', icon: toolImage('icon-welder.png') },
+  { name: 'Narvon va iskala', short: 'Narvon va iskala', count: '22 ta', color: 'blue', icon: toolImage('other-ladder.jpg') },
+  { name: 'Lazer nivo', short: 'Lazer nivo', count: '18 ta', color: 'teal', icon: toolImage('other-laser-level.jpg') },
+  { name: 'Generatorlar', short: 'Generator', count: '27 ta', color: 'orange', icon: toolImage('other-generator.jpg') },
+  { name: 'Bosimli yuvish', short: 'Bosimli yuvish', count: '14 ta', color: 'gray', icon: toolImage('other-pressure-washer.jpg') }
 ];
 const allCategories = [...categories, ...otherCategories];
 
@@ -158,6 +187,17 @@ function App() {
 
   const selectedEquipment = equipment.find((item) => item.id === selectedId) || equipment[0];
   const copy = translations[lang];
+  const stats = useMemo(() => {
+    const rated = equipment.filter((item) => item.rating > 0);
+    const averageRating = rated.length ? rated.reduce((sum, item) => sum + item.rating, 0) / rated.length : 0;
+    return {
+      activeTools: equipment.length,
+      regions: new Set(equipment.map((item) => item.location)).size,
+      averageRating: averageRating.toFixed(1),
+      reviews: equipment.reduce((sum, item) => sum + (item.reviews || 0), 0),
+      satisfaction: averageRating ? Math.round((averageRating / 5) * 100) : 0
+    };
+  }, [equipment]);
   const filteredEquipment = useMemo(() => equipment.filter((item) => {
     const matchesText = !search || `${item.name} ${item.category} ${item.location}`.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = category === 'Barchasi' || item.category === category;
@@ -318,7 +358,7 @@ function App() {
       </header>
 
       <main id="main-content">
-        {page === 'home' && <Home copy={copy} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} chooseCategory={chooseCategory} openDetail={openDetail} toggleFavorite={toggleFavorite} favorites={favorites} setListingOpen={openListing} goTo={goTo} location={location} openRegionPicker={() => setRegionOpen(true)} />}
+        {page === 'home' && <Home copy={copy} stats={stats} equipment={equipment} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} chooseCategory={chooseCategory} openDetail={openDetail} toggleFavorite={toggleFavorite} favorites={favorites} setListingOpen={openListing} goTo={goTo} location={location} openRegionPicker={() => setRegionOpen(true)} />}
         {page === 'catalog' && <Catalog copy={copy} items={filteredEquipment} searchDraft={searchDraft} setSearchDraft={setSearchDraft} submitSearch={submitSearch} category={category} setCategory={(value) => { setCategory(value); setFavoritesOnly(false); }} location={location} setLocation={setLocation} openRegionPicker={() => setRegionOpen(true)} maxPrice={maxPrice} setMaxPrice={setMaxPrice} favorites={favorites} toggleFavorite={toggleFavorite} openDetail={openDetail} favoritesOnly={favoritesOnly} setFavoritesOnly={setFavoritesOnly} />}
         {page === 'detail' && <Detail item={selectedEquipment} isFavorite={favorites.has(selectedEquipment.id)} toggleFavorite={toggleFavorite} goTo={goTo} setBookingOpen={setBookingOpen} createBooking={createBooking} notify={notify} contactOwner={contactOwner} />}
         {page === 'dashboard' && <Dashboard bookings={bookings} equipment={equipment} goTo={goTo} setListingOpen={openListing} notify={notify} initialTab={dashboardStartTab} />}
@@ -357,7 +397,7 @@ function UserPopover({ goTo, openAuth }) {
   </div>;
 }
 
-function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory, openDetail, toggleFavorite, favorites, setListingOpen, goTo, location, openRegionPicker }) {
+function Home({ copy, stats, equipment, searchDraft, setSearchDraft, submitSearch, chooseCategory, openDetail, toggleFavorite, favorites, setListingOpen, goTo, location, openRegionPicker }) {
   return <>
     <section className="hero-section">
       <div className="hero-noise" />
@@ -366,10 +406,10 @@ function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory,
           <div className="eyebrow light"><span className="pulse-dot" /> O‘zbekistondagi #1 asboblar marketplace</div>
           <h1>{copy.heroLead}<br /><span>{copy.heroAccent}</span></h1>
           <p>{copy.heroDesc}</p>
-          <div className="hero-proof"><span className="proof-avatars"><i>AS</i><i>BK</i><i>NM</i><i>+</i></span><span><strong>2,400+</strong> usta allaqachon tanladi</span></div>
+          <div className="hero-proof"><span className="proof-avatars"><i>AS</i><i>BK</i><i>NM</i><i>+</i></span><span><strong>{stats.activeTools} ta</strong> asbob hozir katalogda</span></div>
         </div>
         <form className="search-panel" onSubmit={submitSearch}>
-          <div className="search-panel-title"><span><Search size={17} /> {copy.search}</span><small>360+ e’lon ichidan</small></div>
+          <div className="search-panel-title"><span><Search size={17} /> {copy.search}</span><small>{stats.activeTools} ta e’lon ichidan</small></div>
           <label className="search-field"><span className="field-icon"><Search size={18} /></span><span><small>Asbob turi</small><input value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="Masalan, shurupovyor" /></span></label>
           <div className="search-row">
             <button type="button" className="search-field compact region-field" onClick={openRegionPicker}><span className="field-icon"><MapPin size={18} /></span><span><small>Joylashuv</small><b>{location || copy.allRegions}</b></span><ChevronDown size={14} /></button>
@@ -383,7 +423,7 @@ function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory,
     </section>
 
     <section className="page-width trust-strip">
-      <div><strong>1,200+</strong><span>Faol asbob</span></div><div><strong>24</strong><span>Viloyatda xizmat</span></div><div><strong>4.9/5</strong><span>O‘rtacha reyting</span></div><div><strong>98%</strong><span>Mamnun mijozlar</span></div>
+      <div><strong>{stats.activeTools}</strong><span>Faol asbob</span></div><div><strong>{stats.regions}</strong><span>Hududda xizmat</span></div><div><strong>{stats.averageRating}/5</strong><span>{stats.reviews} ta sharh</span></div><div><strong>{stats.satisfaction}%</strong><span>Mamnun mijozlar</span></div>
       <div className="trust-note"><ShieldCheck size={20} /><span><b>Tekshirilgan hamjamiyat</b><small>Har bir e’lon nazoratdan o‘tadi</small></span></div>
     </section>
 
@@ -399,7 +439,7 @@ function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory,
 
     <section className="page-width section-block other-rentals-section">
       <div className="section-heading"><div><span className="eyebrow">Yana kerak bo‘lishi mumkin</span><h2>Boshqa arendalar</h2><p className="section-description">Loyihangizni yakunlash uchun qo‘shimcha asboblar.</p></div><button className="text-button" onClick={() => goTo('catalog')}>Barchasini ko‘rish <ArrowRight size={16} /></button></div>
-      <div className="other-rentals-grid">{equipmentSeed.slice(3).map((item) => <EquipmentCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onFavorite={() => toggleFavorite(item.id)} onClick={() => openDetail(item.id)} />)}</div>
+      <div className="other-rentals-grid">{otherRentalSeed.map((item) => <EquipmentCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onFavorite={() => toggleFavorite(item.id)} onClick={() => openDetail(item.id)} />)}</div>
     </section>
 
     <section className="how-section" id="how-it-works">
