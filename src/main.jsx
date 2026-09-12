@@ -12,6 +12,7 @@ import {
 import './styles.css';
 import './ios17-overrides.css';
 import './security-a11y.css';
+import './production-polish.css';
 
 const toolImage = (name) => `/assets/${name}`;
 const equipmentSeed = [
@@ -57,10 +58,13 @@ const categories = [
   { name: 'Shurupovyortlar', short: 'Shurupovyor', count: '86 ta', color: 'blue', icon: toolImage('icon-drill.png') },
   { name: 'Perforatorlar', short: 'Perforator', count: '64 ta', color: 'teal', icon: toolImage('icon-perforator.png') },
   { name: 'Bolgarkalar', short: 'Bolgarka', count: '72 ta', color: 'orange', icon: toolImage('icon-grinder.png') },
-  { name: 'Arralar', short: 'Diskli arra', count: '48 ta', color: 'purple', icon: toolImage('icon-saw.png') },
-  { name: 'Beton uskunalari', short: 'Beton uskunasi', count: '36 ta', color: 'green', icon: toolImage('icon-mixer.png') },
+  { name: 'Beton uskunalari', short: 'Beton uskunasi', count: '36 ta', color: 'green', icon: toolImage('icon-mixer.png') }
+];
+const otherCategories = [
+  { name: 'Diskli arralar', short: 'Diskli arra', count: '48 ta', color: 'purple', icon: toolImage('icon-saw.png') },
   { name: 'Payvandlash', short: 'Payvandlash', count: '57 ta', color: 'gray', icon: toolImage('icon-welder.png') }
 ];
+const allCategories = [...categories, ...otherCategories];
 
 const initialBookings = [
   { id: 'AT-2048', equipment: equipmentSeed[1], start: '2026-09-18', end: '2026-09-20', days: 3, total: 540000, status: 'Tasdiqlandi', payment: 'Payme' },
@@ -322,6 +326,7 @@ function App() {
       </main>
 
       {page !== 'admin' && <Footer goTo={goTo} />}
+      <MobileDock page={page} goTo={goTo} openFavorites={openFavorites} openAuth={() => setAuthOpen(true)} isAuthenticated={isAuthenticated} />
       {bookingOpen && <BookingModal item={selectedEquipment} close={() => setBookingOpen(false)} confirm={createBooking} />}
       {listingOpen && <ListingModal close={() => setListingOpen(false)} submit={addListing} />}
       {regionOpen && <RegionModal value={location || 'Barcha viloyatlar'} close={() => setRegionOpen(false)} select={selectRegion} />}
@@ -392,6 +397,11 @@ function Home({ copy, searchDraft, setSearchDraft, submitSearch, chooseCategory,
       <div className="equipment-grid">{equipmentSeed.slice(0, 3).map((item) => <EquipmentCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onFavorite={() => toggleFavorite(item.id)} onClick={() => openDetail(item.id)} />)}</div>
     </section>
 
+    <section className="page-width section-block other-rentals-section">
+      <div className="section-heading"><div><span className="eyebrow">Yana kerak bo‘lishi mumkin</span><h2>Boshqa arendalar</h2><p className="section-description">Loyihangizni yakunlash uchun qo‘shimcha asboblar.</p></div><button className="text-button" onClick={() => goTo('catalog')}>Barchasini ko‘rish <ArrowRight size={16} /></button></div>
+      <div className="other-rentals-grid">{equipmentSeed.slice(3).map((item) => <EquipmentCard key={item.id} item={item} isFavorite={favorites.has(item.id)} onFavorite={() => toggleFavorite(item.id)} onClick={() => openDetail(item.id)} />)}</div>
+    </section>
+
     <section className="how-section" id="how-it-works">
       <div className="page-width"><div className="section-heading centered"><div><span className="eyebrow">Oddiy va qulay</span><h2>3 qadamda asbob tayyor</h2><p className="section-description">Qidirishdan ishni boshlashgacha — hammasi bitta joyda.</p></div></div>
         <div className="steps-grid"><div className="step-card"><span className="step-number">01</span><span className="step-icon"><Search size={22} /></span><h3>Qidiring</h3><p>Asbob turi, joylashuvi va sanani belgilang. O‘zingizga mos variantni toping.</p></div><div className="step-line" /><div className="step-card"><span className="step-number">02</span><span className="step-icon"><CalendarCheck2 size={22} /></span><h3>Band qiling</h3><p>Bo‘sh sanalarni tanlang va egaga band qilish so‘rovini yuboring.</p></div><div className="step-line" /><div className="step-card"><span className="step-number">03</span><span className="step-icon"><Truck size={22} /></span><h3>Ishni boshlang</h3><p>Kelishilgan manzilda asbobni qabul qiling va loyihangizni boshlang.</p></div></div>
@@ -419,7 +429,7 @@ function Catalog({ copy, items, searchDraft, setSearchDraft, submitSearch, categ
     <div className="catalog-searchbar"><form onSubmit={submitSearch}><Search size={18} /><input value={searchDraft} onChange={(e) => setSearchDraft(e.target.value)} placeholder="Asbob nomi yoki turi bo‘yicha qidiring" /><button type="submit">Qidirish</button></form><button type="button" className="catalog-region-button" onClick={openRegionPicker}><MapPin size={17} /><span>{location || 'Barcha viloyatlar'}</span><ChevronDown size={14} /></button><label><CalendarDays size={17} /><span>Sanani tanlang</span><ChevronDown size={14} /></label></div>
     <div className="catalog-layout">
       <aside className={`filter-sidebar ${mobileFilters ? 'mobile-open' : ''}`}><div className="filter-header"><strong>Filtrlar</strong><button onClick={() => { setCategory('Barchasi'); setLocation(''); setMaxPrice(1000000); setFavoritesOnly(false); }}>Tozalash</button><button className="filter-close" onClick={() => setMobileFilters(false)}><X size={18} /></button></div>
-        <FilterGroup title="Asbob turi"><label className="radio-row"><input type="radio" checked={category === 'Barchasi'} onChange={() => setCategory('Barchasi')} /><span className="fake-radio" /> Barchasi <small>420</small></label>{categories.map((item) => <label className="radio-row" key={item.short}><input type="radio" checked={category === item.short} onChange={() => setCategory(item.short)} /><span className="fake-radio" /> {item.name} <small>{item.count.replace(' ta', '')}</small></label>)}</FilterGroup>
+        <FilterGroup title="Asbob turi"><label className="radio-row"><input type="radio" checked={category === 'Barchasi'} onChange={() => setCategory('Barchasi')} /><span className="fake-radio" /> Barchasi <small>420</small></label>{allCategories.map((item) => <label className="radio-row" key={item.short}><input type="radio" checked={category === item.short} onChange={() => setCategory(item.short)} /><span className="fake-radio" /> {item.name} <small>{item.count.replace(' ta', '')}</small></label>)}</FilterGroup>
         <FilterGroup title="Narx oralig‘i"><div className="price-range-values"><span>0 so‘m</span><b>{shortPrice(maxPrice)}</b></div><input className="range-input" type="range" min="50000" max="1000000" step="10000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} /><div className="range-labels"><span>50 ming</span><span>1 mln+</span></div></FilterGroup>
         <FilterGroup title="Joylashuv"><label className="select-field"><MapPin size={16} /><select value={location} onChange={(e) => setLocation(e.target.value)}><option value="">Barcha hududlar</option><option>Toshkent shahri</option><option>Toshkent viloyati</option><option>Samarqand shahri</option><option>Farg‘ona viloyati</option><option>Andijon shahri</option></select><ChevronDown size={14} /></label></FilterGroup>
         <FilterGroup title="Qo‘shimcha"><label className="check-row"><input type="checkbox" /> <span className="fake-check"><Check size={12} /></span> Faqat tasdiqlanganlar</label><label className="check-row"><input type="checkbox" /> <span className="fake-check"><Check size={12} /></span> Operator bilan</label><label className="check-row"><input type="checkbox" /> <span className="fake-check"><Check size={12} /></span> Yetkazib berish</label></FilterGroup>
@@ -477,7 +487,7 @@ function ListingModal({ close, submit }) {
     <div className="listing-helper"><Info size={15} /><span><b>Yaxshi e’lon ko‘proq band qilinadi.</b><small>Asbob nomi, aniq narx va yaxshi rasm qo‘shing.</small></span></div>
     <div className="modal-form-grid">
       <label>Asbob nomi *<input placeholder="Masalan, Bosch GBH 2-28" value={form.name} onChange={(e) => update('name', e.target.value)} /></label>
-      <label>Kategoriya *<select value={form.category} onChange={(e) => update('category', e.target.value)}>{categories.map((item) => <option key={item.short}>{item.short}</option>)}</select></label>
+      <label>Kategoriya *<select value={form.category} onChange={(e) => update('category', e.target.value)}>{allCategories.map((item) => <option key={item.short}>{item.short}</option>)}</select></label>
       <label>Joylashuv *<select value={form.location} onChange={(e) => update('location', e.target.value)}><option>Toshkent shahri</option><option>Toshkent viloyati</option><option>Samarqand shahri</option><option>Farg‘ona viloyati</option><option>Andijon viloyati</option><option>Qashqadaryo viloyati</option></select></label>
       <label>Kunlik narx *<div className="input-with-suffix"><input type="number" placeholder="120 000" value={form.price} onChange={(e) => update('price', e.target.value)} /><span>so‘m</span></div></label>
       <label>Ishlab chiqarilgan yil<input type="number" value={form.year} onChange={(e) => update('year', e.target.value)} /></label>
@@ -550,6 +560,15 @@ function AdminStat({ icon: Icon, label, value, change, color }) { return <div cl
 function AdminUsers({ notify }) { const users = [['AK', 'Azizbek Qurbonov', 'azizbek@mail.uz', 'Egasi', 'Faol'], ['SM', 'Sardor Mamatov', 'sardor@mail.uz', 'Ijarachi', 'Faol'], ['BT', 'Bekzod Transport', 'info@bekzod.uz', 'Biznes', 'Faol'], ['NA', 'Nodira Abdullayeva', 'nodira@mail.uz', 'Ijarachi', 'Tekshiruvda']]; return <><div className="admin-heading compact"><div><span className="eyebrow">2,428 ta akkaunt</span><h2>Foydalanuvchilar</h2><p>Platformadagi barcha foydalanuvchilarni boshqaring.</p></div><button className="dark-button" onClick={() => notify('Foydalanuvchi qo‘shish oynasi') }><Plus size={16} /> Foydalanuvchi qo‘shish</button></div><div className="admin-table-wrap"><div className="admin-table-toolbar"><div className="table-search"><Search size={16} /><input placeholder="Ism yoki email bo‘yicha qidiring" /></div><button className="outline-button"><Filter size={15} /> Filtr</button></div><div className="admin-table"><div className="admin-table-head"><span>Foydalanuvchi</span><span>Rol</span><span>Ro‘yxatdan o‘tgan</span><span>Holat</span><span /></div>{users.map((user, index) => <div className="admin-table-row" key={user[1]}><span className="table-user"><span className="avatar">{user[0]}</span><span><b>{user[1]}</b><small>{user[2]}</small></span></span><span>{user[3]}</span><span>{12 - index} sen 2026</span><span className={`status ${user[4] === 'Faol' ? 'confirmed' : 'pending'}`}><i /> {user[4]}</span><button onClick={() => notify('Foydalanuvchi amallari')}><MoreHorizontal size={17} /></button></div>)}</div></div></>; }
 function AdminListings({ equipment, notify }) { return <><div className="admin-heading compact"><div><span className="eyebrow">1,204 ta e’lon</span><h2>E’lonlarni boshqarish</h2><p>Yangi e’lonlarni tekshiring va platformani tartibli saqlang.</p></div><button className="outline-button"><Filter size={15} /> Filtrlar</button></div><div className="admin-table-wrap"><div className="admin-table-toolbar"><div className="table-search"><Search size={16} /><input placeholder="Asbob nomi bo‘yicha qidiring" /></div><span className="table-toolbar-note"><i /> 8 ta moderatsiyada</span></div><div className="admin-listing-table">{equipment.map((item) => <div className="admin-listing-row" key={item.id}><img src={item.image} alt="" /><span><b>{item.name}</b><small><MapPin size={12} /> {item.location}</small></span><span>{item.category}</span><strong>{formatPrice(item.price)}<small>/ kuniga</small></strong><span className="status confirmed"><i /> Faol</span><button onClick={() => notify(`${item.name} tahrirlash`)}><Edit3 size={15} /></button></div>)}</div></div></>; }
 function AdminOrders({ bookings, notify }) { return <><div className="admin-heading compact"><div><span className="eyebrow">86 ta buyurtma</span><h2>Buyurtmalar</h2><p>Barcha bandlovlar holatini kuzating.</p></div><button className="outline-button"><Filter size={15} /> Filtrlar</button></div><div className="admin-table-wrap"><div className="admin-table"><div className="admin-table-head orders"><span>Buyurtma</span><span>Mijoz</span><span>Asbob</span><span>Sana</span><span>Holat</span><span /></div>{[...bookings, ...bookings].map((booking, index) => <div className="admin-table-row orders" key={`${booking.id}-${index}`}><span><b>#{booking.id}</b><small>12 sen 2026</small></span><span><span className="table-user compact"><span className="avatar avatar-tiny">MK</span><b>Murod Karimov</b></span></span><span>{booking.equipment.name}</span><span>{booking.start}</span><span className={`status ${booking.status === 'Yakunlandi' ? 'done' : 'confirmed'}`}><i /> {booking.status}</span><button onClick={() => notify('Buyurtma tafsilotlari')}><MoreHorizontal size={17} /></button></div>)}</div></div></>; }
+
+function MobileDock({ page, goTo, openFavorites, openAuth, isAuthenticated }) {
+  return <nav className="mobile-dock" aria-label="Mobil navigatsiya">
+    <button className={page === 'home' ? 'active' : ''} onClick={() => goTo('home')}><LayoutDashboard size={18} /><small>Bosh sahifa</small></button>
+    <button className={page === 'catalog' || page === 'detail' ? 'active' : ''} onClick={() => goTo('catalog')}><Search size={18} /><small>Katalog</small></button>
+    <button onClick={openFavorites}><Heart size={18} /><small>Sevimli</small></button>
+    <button className={page === 'dashboard' ? 'active' : ''} onClick={() => isAuthenticated ? goTo('dashboard') : openAuth()}><UserCircle size={18} /><small>{isAuthenticated ? 'Kabinet' : 'Kirish'}</small></button>
+  </nav>;
+}
 
 function Footer({ goTo }) { return <footer className="site-footer"><div className="page-width footer-top"><div className="footer-brand"><button className="brand" onClick={() => goTo('home')}><span className="brand-mark"><img src="/assets/arendatexnika-logo.png" alt="" /></span><span><strong>Arenda</strong><em>Texnika</em></span></button><p>Qurilish ishingizga kerakli asbob — bir necha klikda.</p><div className="social-row"><span>in</span><span>f</span><span>tg</span><span>◎</span></div></div><div className="footer-links"><div><strong>Platforma</strong><button onClick={() => goTo('catalog')}>Katalog</button><button>Qanday ishlaydi?</button><button>Asbob joylash</button><button>Hamkorlik</button></div><div><strong>Yordam</strong><button>Yordam markazi</button><button>Foydalanish shartlari</button><button>Maxfiylik siyosati</button><button>Biz bilan bog‘lanish</button></div><div className="footer-contact"><strong>Aloqa</strong><a href="tel:+998712000000"><Phone size={14} /> +998 71 200 00 00</a><a href="mailto:hello@arendatexnika.uz"><Mail size={14} /> hello@arendatexnika.uz</a><small>Toshkent shahri, Yunusobod tumani</small></div></div></div><div className="page-width footer-bottom"><span>© 2026 ArendaTexnika. Barcha huquqlar himoyalangan.</span><span><span className="online-dot" /> Platforma faol</span><span>O‘zbekistonda yaratilgan <span>♥</span></span></div></footer>; }
 

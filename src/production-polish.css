@@ -1,0 +1,44 @@
+/* Production layout guardrails and the four-category + other-rentals home layout */
+.category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.other-rentals-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.other-rentals-grid .equipment-image-wrap { height: 190px; }
+.other-rentals-section { padding-top: 54px; }
+body { overflow-x: hidden; }
+img { max-width: 100%; }
+h1, h2, h3, h4, p, small, strong, b, span, button, a { overflow-wrap: anywhere; }
+.equipment-card h3, .category-content strong, .booking-row-info strong { overflow-wrap: normal; word-break: normal; }
+.card-footer { gap: 10px; flex-wrap: wrap; }
+.card-footer > span { min-width: 0; }.card-action { margin-left: auto; }
+.catalog-searchbar > *, .catalog-layout > *, .detail-layout > *, .dashboard-layout > *, .admin-layout > * { min-width: 0; }
+.catalog-searchbar { overflow: hidden; }.catalog-searchbar form, .catalog-region-button, .catalog-searchbar > label { min-width: 0; }
+.catalog-searchbar input, .catalog-region-button span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.modal-actions { flex-wrap: wrap; }.modal-actions button { max-width: 100%; }
+.mobile-dock { display: none; }
+@media (max-width: 1050px) {
+  .category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .other-rentals-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .app-shell { padding-bottom: 70px; }
+  .mobile-dock { position: fixed; z-index: 65; right: 12px; bottom: 12px; left: 12px; display: grid; grid-template-columns: repeat(4, 1fr); padding: 7px; border: 1px solid rgba(255,255,255,.85); border-radius: 20px; background: rgba(255,255,255,.78); box-shadow: 0 10px 30px rgba(28,28,30,.15); backdrop-filter: saturate(180%) blur(22px); }
+  .mobile-dock button { min-width: 0; display: flex; align-items: center; flex-direction: column; gap: 3px; padding: 7px 4px; color: #8e8e93; border-radius: 14px; font-size: 10px; transition: .2s ease; }
+  .mobile-dock button.active, .mobile-dock button:hover { color: #0a84ff; background: #eaf3ff; }
+  .mobile-dock small { overflow: hidden; max-width: 100%; font-size: 8px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+  .category-grid, .other-rentals-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .category-card { min-width: 0; }.category-content { min-width: 0; }.category-content strong { max-width: 100%; }
+  .other-rentals-grid .equipment-image-wrap { height: 145px; }
+  .other-rentals-grid .equipment-card-body { padding: 12px; }
+  .other-rentals-grid .card-footer { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .other-rentals-grid .card-action { margin-left: 0; }
+  .section-heading { min-width: 0; }.section-heading > div { min-width: 0; }
+  .section-heading h2 { max-width: 100%; }
+  .catalog-searchbar form button { flex: 0 0 auto; }.catalog-region-button { width: 100%; }
+  .date-inputs, .modal-form-grid { min-width: 0; }
+}
+@media (max-width: 420px) {
+  .category-grid, .other-rentals-grid { grid-template-columns: 1fr 1fr; }
+  .category-card { min-height: 117px; padding: 12px; }.category-art { width: 42px; height: 42px; }
+  .equipment-image-wrap, .catalog-results .equipment-image-wrap { height: 188px; }
+  .other-rentals-grid .equipment-image-wrap { height: 128px; }
+  .other-rentals-grid .equipment-card h3 { font-size: 12px; }
+}
