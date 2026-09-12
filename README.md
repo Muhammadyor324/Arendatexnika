@@ -9,12 +9,25 @@ npm install
 npm run dev
 ```
 
-Production build:
+Production build va tekshiruv:
 
 ```bash
 npm run build
 npm audit --omit=dev
 ```
+
+## Vercel Free deploy
+
+Loyiha Vercel free hosting uchun tayyorlangan:
+
+1. GitHub’dan `Muhammadyor324/Arendatexnika` reposini import qiling.
+2. Branch: `arena/01a0952b-arendatexnika`.
+3. Framework: `Vite` yoki `Other`.
+4. Build command: `npm run build`.
+5. Output directory: `dist`.
+6. Install command: `npm install`.
+
+`vercel.json` ichida SPA routing, PWA assetlar va production security header’lari tayyor.
 
 ## Dizayn va lokal assetlar
 
@@ -23,31 +36,32 @@ Interfeys iOS 17 ruhida qayta ishlangan: oq va och kulrang qatlamlar, `backdrop-
 `public/assets/` ichida loyiha uchun maxsus yaratilgan lokal visual assetlar bor:
 
 - ArendaTexnika app-logo
-- Kategoriya ikonkalari: shurupovyor, perforator, bolgarka, arra, beton aralashtirgich, payvandlash
+- Logo-uslubidagi kategoriya ikonkalari
 - Katalog kartalari uchun professional asbob rasmlari
 
-## Ishlaydigan marketplace oqimlari
+## Marketplace imkoniyatlari
 
-- Asbob kategoriyalari endi mahsulot fotosi emas, maxsus logo-uslubidagi ikonka bilan ko‘rsatiladi.
+- Bosh sahifada 4 ta asosiy kategoriya: shurupovyor, perforator, bolgarka va beton uskunalari.
+- Alohida “Boshqa arendalar” bo‘limi: diskli arra va payvandlash kabi qo‘shimcha asboblar.
 - OLX uslubidagi hudud tanlash oynasi: qidirish, viloyat/shahar bo‘yicha filtrlash va tanlangan hududni header’da ko‘rsatish.
 - Asbob kartochkasi, batafsil sahifa, kunlik ijara, kalendar, narx hisoblash va Payme/Click/naqd to‘lov tanlovi.
 - Band qilish yoki arendatorga yozishdan oldin login/ro‘yxatdan o‘tish oynasi ochiladi.
-- Muvaffaqiyatli login’dan keyin foydalanuvchi kutgan amal davom etadi: bandlov yakunlanadi, arendator bilan chat ochiladi yoki e’lon formasi ochiladi.
-- Chat/messenger: arendator va ijarachi aloqasi uchun tayyor interaktiv UI.
-- E’lon egasi uchun soddalashtirilgan forma: kategoriya, viloyat, narx, quvvat, imkoniyat, tayyor tavsif shablonlari va rasm/video yuklash preview’i.
-- O‘zbek, rus va ingliz tillari uchun ishlaydigan til almashtirish tugmasi; asosiy navigatsiya va bosh sahifa matnlari tarjima qilinadi.
-- Responsive va animatsiyali UI: sahifa kirish animatsiyasi, hover states, yumshoq micro-interactions va mobil panel.
+- Muvaffaqiyatli login’dan keyin foydalanuvchi kutgan amal davom etadi: bandlov yakunlanadi, chat ochiladi yoki e’lon formasi ochiladi.
+- Arendator uchun qulay e’lon formasi: kategoriya, viloyat, narx, quvvat, imkoniyat, tayyor tavsif shablonlari va rasm/video preview’i.
+- O‘zbek, rus va ingliz tillari uchun til almashtirish.
+- Desktop va mobil uchun alohida optimizatsiya: mobil bottom navigation, overflow himoyasi va touch-friendly tugmalar.
+- PWA manifest va favicon.
 - Admin panel: foydalanuvchilar, e’lonlar, buyurtmalar, moderatsiya, daromad grafigi va kategoriyalar statistikasi.
 
 ## Kod sifati va xavfsizlik
 
 - React escaped rendering ishlatiladi; user kiritgan matn HTML sifatida inject qilinmaydi.
 - Auth formasi bo‘sh ma’lumot va qisqa parollarni qabul qilmaydi.
-- Media yuklash faqat rasm/video MIME turini va 10 MB limitni tekshiradi.
-- Parol localStorage’ga yozilmaydi; faqat UI state’da ishlatiladi.
-- Sevimlilar, hudud, til va buyurtmalar faqat demo ma’lumot sifatida namespaced localStorage’da saqlanadi.
-- Vite server va preview uchun `nosniff`, `Referrer-Policy`, `Permissions-Policy` va COOP security headerlari qo‘shilgan.
-- Error boundary, keyboard focus state, skip-link va reduced-motion qo‘llab-quvvatlashi bor.
-- `npm audit --omit=dev` tekshiruvi: 0 vulnerability.
+- Media yuklash MIME turini va 10 MB limitni tekshiradi.
+- Parol localStorage’ga yozilmaydi; sevimlilar, hudud, til va buyurtmalar namespaced localStorage’da saqlanadi.
+- Buzilgan localStorage ma’lumotlari xavfsiz default qiymatga qaytariladi.
+- Vite va Vercel uchun `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP va CSP header’lari qo‘shilgan.
+- Error boundary, keyboard focus, skip-link va reduced-motion qo‘llab-quvvatlashi bor.
+- `npm audit --omit=dev`: 0 vulnerability.
 
-Hozirgi versiya frontend MVP sifatida local state bilan ishlaydi. Real Payme/Click, SMS OTP, xarita API, fayl storage va backend ulanishi uchun server/API kalitlari qo‘shilishi kerak.
+Hozirgi versiya production-ready frontend sifatida ishlaydi. Real Payme/Click, SMS OTP, xarita API, fayl storage va backend ulanishi uchun server/API kalitlari qo‘shilishi kerak.
